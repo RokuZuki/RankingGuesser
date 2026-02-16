@@ -1,0 +1,1106 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ranking Guesser Party</title>
+
+    <!-- OGP設定 -->
+    <meta property="og:title" content="Ranking Guesser Party" />
+    <meta property="og:description" content="Party game to guess the ranking! / 価値観共有パーティーゲーム！" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://example.com" />
+    <meta property="og:image" content="https://example.com/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- ライブラリ読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            touch-action: manipulation;
+            min-height: 100vh;
+            color: #333;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .pop-in {
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .list-move {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+
+            .toggle-checkbox:checked + .toggle-label {
+                background-color: #10B981;
+            }
+
+        .uppercase-style {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // --- 多言語リソース ---
+        const TRANSLATIONS = {
+            ja: {
+                title: "Ranking Guesser",
+                subtitle: "価値観丸裸！パーティーゲーム",
+                nickname: "ニックネーム",
+                nicknamePlaceholder: "あなたの名前",
+                roomId: "部屋ID",
+                roomIdPlaceholder: "部屋IDを入力",
+                roomIdNote: "(参加する場合のみ)",
+                createRoom: "部屋を作る",
+                joinRoom: "参加する",
+                connecting: "接続中...",
+                book: "お題図鑑",
+                lobby: "ロビー",
+                waitingMembers: "メンバー待機中...",
+                host: "HOST",
+                you: "YOU",
+                gameSettings: "ゲーム設定",
+                rounds: "ラウンド数",
+                category: "出題カテゴリ",
+                mode: "実況モード",
+                modeOn: "ON (見える)",
+                modeOff: "OFF (秘密)",
+                modeDescOn: "親の操作がリアルタイムで参加者に共有されます",
+                modeDescOff: "親が決定するまで、参加者はランキングを見れません",
+                startGame: "ゲームスタート",
+                hostSetting: "ホストが設定中...",
+                round: "ROUND",
+                topicTitle: "お題に合わせて並べ替えろ！",
+                hostWaitTitle: "親がランキング作成中...",
+                topicUnknown: "？？？？？",
+                decide: "決定！",
+                hostThinking: "親が悩んでいます...",
+                rankingBy: "RANKING by",
+                guessTitle: "お題は何だった？",
+                yourTopic: "あなたが選んだお題",
+                waitAnswer: "みんなの回答を待っています...",
+                waitOthers: "他の人を待っています...",
+                finalResult: "最終結果",
+                result: "結果発表",
+                gameOver: "ゲーム終了！",
+                correctTopic: "正解のお題",
+                bonus: "出題ボーナス",
+                allWrong: "全員不正解...",
+                nice: "NICE!",
+                miss: "MISS...",
+                winner: "WINNER!",
+                nextRound: "次のラウンドへ",
+                returnLobby: "ロビーへ戻る(再戦)",
+                returnTitle: "タイトルに戻る",
+                hostLeft: "ホストが退出しました。タイトルに戻ります。",
+                connError: "通信エラー",
+                connFail: "接続失敗",
+                inputName: "名前を入力してください",
+                checkId: "IDを確認してください",
+                copy: "COPIED!",
+                room: "ROOM",
+                aboutTitle: "このゲームについて",
+                aboutDesc: "ホスト（親）が決めた「あるお題」に基づくランキングを見て、そのお題が何だったのかを当てる心理戦ゲームです。",
+                howToPlay: "遊び方",
+                step1: "部屋を作る: ホストが部屋を作成し、IDを共有します。",
+                step2: "参加する: 友達はIDを入力して入室します。",
+                step3: "ランク付け: 親がお題を見て、参加者をランク付けします。",
+                step4: "推理: 子はランキングを見て「どのお題だったか」を当てます。",
+                distributionTitle: "実況・配信・動画投稿について",
+                distributionDesc: "個人・法人を問わず、実況配信や動画投稿を自由に行っていただけます。事前連絡は不要です。収益化も問題ありません。ぜひ皆さんで楽しんでください！",
+                footer: "© 2026 Rokun. All rights reserved.",
+                cat_all: "すべてミックス",
+                cat_survival: "サバイバル・もしも",
+                cat_personality: "性格・メンタル",
+                cat_daily: "生活・日常",
+                cat_love: "恋愛・結婚",
+                cat_work: "仕事・才能",
+                cat_fantasy: "ファンタジー・中二病",
+                cat_school: "学校・青春",
+                cat_misc: "ネタ・その他"
+            },
+            en: {
+                title: "Ranking Guesser",
+                subtitle: "The Party Game of Values!",
+                nickname: "NICKNAME",
+                nicknamePlaceholder: "Your Name",
+                roomId: "ROOM ID",
+                roomIdPlaceholder: "Enter Room ID",
+                roomIdNote: "(To Join)",
+                createRoom: "Create Room",
+                joinRoom: "Join Room",
+                connecting: "Connecting...",
+                book: "Topics",
+                lobby: "LOBBY",
+                waitingMembers: "Waiting for players...",
+                host: "HOST",
+                you: "YOU",
+                gameSettings: "Game Settings",
+                rounds: "Rounds",
+                category: "Category",
+                mode: "Live Mode",
+                modeOn: "ON (Visible)",
+                modeOff: "OFF (Secret)",
+                modeDescOn: "Players can see the host sorting in real-time.",
+                modeDescOff: "Players cannot see the ranking until the host decides.",
+                startGame: "Start Game",
+                hostSetting: "Host is configuring...",
+                round: "ROUND",
+                topicTitle: "Sort by the Topic!",
+                hostWaitTitle: "Host is ranking...",
+                topicUnknown: "?????",
+                decide: "Confirm!",
+                hostThinking: "Host is thinking...",
+                rankingBy: "RANKING by",
+                guessTitle: "What was the Topic?",
+                yourTopic: "Your Topic",
+                waitAnswer: "Waiting for answers...",
+                waitOthers: "Waiting for others...",
+                finalResult: "FINAL RESULT",
+                result: "RESULT",
+                gameOver: "GAME OVER!",
+                correctTopic: "Correct Topic",
+                bonus: "Host Bonus",
+                allWrong: "All Wrong...",
+                nice: "NICE!",
+                miss: "MISS...",
+                winner: "WINNER!",
+                nextRound: "Next Round",
+                returnLobby: "Back to Lobby",
+                returnTitle: "Back to Title",
+                hostLeft: "Host disconnected. Returning to title.",
+                connError: "Connection Error",
+                connFail: "Connection Failed",
+                inputName: "Please enter your name",
+                checkId: "Check Room ID",
+                copy: "COPIED!",
+                room: "ROOM",
+                aboutTitle: "About This Game",
+                aboutDesc: "A psychological party game where you guess the 'Topic' based on the ranking decided by the Host.",
+                howToPlay: "How to Play",
+                step1: "Create: Host creates a room and shares the ID.",
+                step2: "Join: Friends enter the ID to join.",
+                step3: "Rank: Host sorts players based on the given topic.",
+                step4: "Guess: Players guess what the topic was.",
+                distributionTitle: "Streaming / Video Policy",
+                distributionDesc: "You are free to stream or upload videos of this game. No permission needed. Monetization is allowed. Have fun!",
+                footer: "© 2026 Rokun. All rights reserved.",
+                cat_all: "Mix All",
+                cat_survival: "Survival / What If",
+                cat_personality: "Personality",
+                cat_daily: "Daily Life",
+                cat_love: "Love / Romance",
+                cat_work: "Work / Talent",
+                cat_fantasy: "Fantasy",
+                cat_school: "School",
+                cat_misc: "Misc / Jokes"
+            }
+        };
+
+        // --- カテゴリ別お題データ (日/英) ---
+        const TOPICS_DATA = {
+            ja: {
+                "cat_survival": [
+                    "無人島で最後まで生き残りそうな人", "ゾンビ映画で最初に犠牲になりそうな人", "デスゲームで最後まで生き残りそうな人",
+                    "デスゲームで一番最初に裏切りそうな人", "明日世界が終わるとしたら一番取り乱しそうな人", "転生したらスライムになりそうな人",
+                    "異世界に行っても即座に適応しそうな人", "透明人間になったら一番悪さをしそうな人", "余命1週間と言われたら一番派手に使いそうな人",
+                    "記憶喪失になっても性格が変わらなそうな人", "宇宙人と遭遇しても仲良くなれそうな人", "タイムスリップしても歴史を変えてしまいそうな人",
+                    "遭難した時、食料を独り占めしそうな人", "お化け屋敷で一番叫びそうな人", "バンジージャンプを笑顔で飛びそうな人",
+                    "サバイバル生活で火起こしが上手そうな人", "地球最後の日に一人で瞑想していそうな人"
+                ],
+                "cat_personality": [
+                    "実は一番腹黒そうな人", "一番涙もろい人", "一番ロマンチストな人", "実は一番甘えん坊な人", "隠し事が下手そうな人",
+                    "怒らせると一番怖そうな人", "無意識に人を傷つけていそうな人", "一番メンタルが強そうな人", "一番嫉妬深そうな人",
+                    "実は一番M気質な人", "実は一番S気質な人", "一番騙されやすそうな人", "一番嘘をつくのが上手そうな人",
+                    "一番サイコパスな一面がありそうな人", "一番正義感が強そうな人", "一番秘密を守ってくれそうな人", "一番空気が読めそうな人",
+                    "一番承認欲求が強そうな人", "一番負けず嫌いな人", "一番平和主義そうな人", "悩み事があっても寝たら忘れそうな人",
+                    "一番おせっかい焼きそうな人", "一番マイペースな人"
+                ],
+                "cat_daily": [
+                    "スマホの画面が一番割れていそうな人", "一番早起きが得意そうな人", "部屋が一番汚そうな人", "LINEの返信が一番遅そうな人",
+                    "一番美味しいご飯を作りそうな人", "一番長生きしそうな人", "宝くじが当たったら一番豪遊しそうな人",
+                    "宝くじが当たっても誰にも言わなそうな人", "一番貯金していそうな人", "一番浪費家そうな人", "一番お酒が強そうな人",
+                    "一番友達が多そうな人", "一番SNSに依存していそうな人", "一番ファッションセンスが良さそうな人",
+                    "財布の中身がレシートでパンパンそうな人", "休日は一歩も家から出なさそうな人", "一番お風呂が長そうな人",
+                    "スーパーの半額シールに一番弱そうな人", "一番健康オタクそうな人", "一番字が汚そうな人"
+                ],
+                "cat_love": [
+                    "一番モテそうな人", "一番一途そうな人", "一番浮気しそうな人", "一番結婚が早そうな人", "一番結婚が遅そうな人",
+                    "恋人にしたら一番尽くしてくれそうな人", "一番理想が高そうな人", "一番駆け引きが上手そうな人", "一番惚れっぽそうな人",
+                    "失恋したら一番引きずりそうな人", "遠距離恋愛でも続きそうな人", "恋人には赤ちゃん言葉を使ってそうな人",
+                    "デートプランを完璧に立てそうな人", "束縛が一番激しそうな人", "恋愛相談したら一番的確なアドバイスをくれそうな人",
+                    "一番ダメンズ/悪女に引っかかりそうな人", "同窓会で運命の再会をしそうな人"
+                ],
+                "cat_work": [
+                    "将来、社長になりそうな人", "ユーチューバーとして成功しそうな人", "実はスパイかもしれない人",
+                    "一番歌が上手そうな人", "一番喧嘩が強そうな人", "一番IQが高そうな人", "一番霊感がありそうな人",
+                    "一番運が良そうな人", "一番運が悪そうな人", "一番動物に好かれそうな人", "一番子供に好かれそうな人",
+                    "一番字が綺麗そうな人", "一番運動神経が良そうな人", "政治家に向いていそうな人",
+                    "詐欺師になっても成功しそうな人", "探偵になったら名推理をしそうな人", "一番出世しそうな人"
+                ],
+                "cat_fantasy": [
+                    "前世が猫だったかもしれない人", "前世が王様だったかもしれない人", "前世が忍者だったかもしれない人",
+                    "悪役令嬢が似合いそうな人", "勇者が似合いそうな人", "魔王が似合いそうな人", "村人Aが似合いそうな人",
+                    "魔法使いになりそうな人", "一番厨二病をこじらせていそうな人", "闇の組織に狙われていそうな人",
+                    "デスノートを拾ったら使いそうな人", "ドラえもんの道具を一番悪用しそうな人", "ポケモンマスターになりそうな人"
+                ],
+                "cat_school": [
+                    "学生時代、一番モテていそうな人", "一番先生に怒られていそうな人", "文化祭で一番張り切りそうな人",
+                    "テスト勉強してないと言って一番点数が高そうな人", "修学旅行の夜に一番はしゃぎそうな人",
+                    "給食をおかわりしていそうな人", "黒板消しクリーナー係をやっていそうな人", "生徒会長をやっていそうな人",
+                    "部活のエースだったっぽい人", "遅刻常習犯だったっぽい人"
+                ],
+                "cat_misc": [
+                    "一番パンツの柄が派手そうな人", "一番寝言がうるさそうな人", "一番くしゃみが大きそうな人",
+                    "一番変なこだわりを持ってそうな人", "一番ドジっ子属性がありそうな人",
+                    "一番リアクション芸人に向いてそうな人", "一番ユーモアセンスがありそうな人", "一番声がデカそうな人",
+                    "鼻毛が出ていても指摘されなさそうな人", "一番変顔が強烈そうな人", "UFOにさらわれそうな人",
+                    "実は着ぐるみを着ているだけかもしれない人", "寝相が一番悪そうな人"
+                ]
+            },
+            en: {
+                "cat_survival": [
+                    "Most likely to survive on a deserted island", "First to die in a zombie movie", "Most likely to win a death game",
+                    "Most likely to betray first in a death game", "Most likely to panic if the world ends tomorrow", "Most likely to be reincarnated as a slime",
+                    "Most likely to adapt immediately to a fantasy world", "Most likely to do bad things if invisible", "Most likely to spend money wildly if given 1 week to live",
+                    "Most likely to stay the same even with amnesia", "Most likely to befriend an alien", "Most likely to change history if time traveled",
+                    "Most likely to hoard food when stranded", "Most likely to scream in a haunted house", "Most likely to skydive with a smile",
+                    "Best at starting a fire in the wild", "Most likely to meditate on the last day of Earth"
+                ],
+                "cat_personality": [
+                    "Secretly the most scheming", "Most likely to cry easily", "Biggest romantic", "Secretly the most spoiled", "Worst at keeping secrets",
+                    "Scariest when angry", "Most likely to hurt others unintentionally", "Strongest mentality", "Most jealous",
+                    "Secretly enjoys being teased (M)", "Secretly enjoys teasing others (S)", "Most gullible", "Best liar",
+                    "Most likely to have a psychopathic side", "Strongest sense of justice", "Best at keeping secrets", "Best at reading the room",
+                    "Strongest desire for approval", "Most competitive", "Biggest pacifist", "Most likely to forget worries after sleeping",
+                    "Most meddlesome", "Most laid-back (My pace)"
+                ],
+                "cat_daily": [
+                    "Most likely to have a cracked phone screen", "Best at waking up early", "Likely to have the messiest room", "Slowest to reply to texts",
+                    "Likely to cook the best food", "Most likely to live the longest", "Most likely to spend wildly if winning the lottery",
+                    "Most likely to keep winning the lottery a secret", "Most likely to have savings", "Biggest spender", "Strongest drinker",
+                    "Likely to have the most friends", "Most addicted to social media", "Best fashion sense",
+                    "Likely to have a wallet full of receipts", "Most likely to stay home all day on holidays", "Takes the longest baths",
+                    "Weakest against discount stickers", "Biggest health nut", "Likely to have the messiest handwriting"
+                ],
+                "cat_love": [
+                    "Most popular/attractive", "Most faithful", "Most likely to cheat", "Most likely to marry first", "Most likely to marry last",
+                    "Most likely to devote everything to a partner", "Highest standards", "Best at playing hard to get", "Falls in love easiest",
+                    "Most likely to drag on a heartbreak", "Most likely to succeed in long-distance relationships", "Likely to use baby talk with a partner",
+                    "Best at planning dates", "Most possessive", "Gives the best relationship advice",
+                    "Most likely to fall for bad boys/girls", "Most likely to reunite with a first love"
+                ],
+                "cat_work": [
+                    "Most likely to become a CEO", "Most likely to succeed as a YouTuber", "Might secretly be a spy",
+                    "Best singer", "Strongest in a fight", "Highest IQ", "Most likely to see ghosts",
+                    "Luckiest", "Unluckiest", "Most liked by animals", "Most liked by children",
+                    "Best handwriting", "Most athletic", "Suited to be a politician",
+                    "Likely to succeed as a con artist", "Likely to be a great detective", "Most likely to get promoted"
+                ],
+                "cat_fantasy": [
+                    "Might have been a cat in a past life", "Might have been a king in a past life", "Might have been a ninja in a past life",
+                    "Suited to be a villainess", "Suited to be a Hero", "Suited to be a Demon King", "Suited to be Villager A",
+                    "Likely to become a wizard", "Most likely to have 'Chuunibyou' (8th grader syndrome)", "Likely targeted by a secret organization",
+                    "Most likely to use a Death Note", "Most likely to misuse Doraemon's gadgets", "Likely to become a Pokémon Master"
+                ],
+                "cat_school": [
+                    "Most popular in school", "Most scolded by teachers", "Most enthusiastic about school festivals",
+                    "Scores high despite saying 'I didn't study'", "Most energetic on school trip nights",
+                    "Likely to ask for seconds at lunch", "Likely to be the blackboard cleaner", "Likely to be Student Council President",
+                    "Likely was the ace of a club", "Likely was always late"
+                ],
+                "cat_misc": [
+                    "Likely to have the flashiest underwear", "Loudest sleep talker", "Loudest sneezer",
+                    "Has the weirdest obsessions", "Most clumsy",
+                    "Suited to be a reaction comedian", "Best sense of humor", "Loudest voice",
+                    "Unlikely to be told if they have a booger showing", "Best funny faces", "Most likely to be abducted by UFOs",
+                    "Might actually be wearing a costume", "Worst sleeping posture"
+                ]
+            }
+        };
+
+        const COLORS = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'];
+
+        // --- ユーティリティ ---
+        const generateId = () => Math.random().toString(36).substr(2, 5).toUpperCase();
+        const getRandomColor = (id) => COLORS[id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % COLORS.length];
+        const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+        const triggerConfetti = () => {
+            const count = 200;
+            const defaults = { origin: { y: 0.7 } };
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+        };
+
+        const triggerSadConfetti = () => {
+            confetti({
+                particleCount: 50,
+                spread: 100,
+                origin: { y: 0.3 },
+                colors: ['#718096', '#a0aec0', '#cbd5e0'],
+                gravity: 2,
+                scalar: 0.8,
+                ticks: 100
+            });
+        };
+
+        // --- コンポーネント ---
+        const Avatar = ({ name, seed, size = "md", className = "" }) => {
+            const sizeClass = { sm: "w-8 h-8 text-xs", md: "w-10 h-10 text-sm", lg: "w-16 h-16 text-xl", xl: "w-24 h-24 text-3xl" }[size];
+            const color = getRandomColor(seed || name);
+            return (
+                <div className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-black shadow-lg shrink-0 border-2 border-white/50 ${className}`}>
+                    {name.charAt(0)}
+                </div>
+            );
+        };
+
+        const RoomBadge = ({ code, label }) => {
+            const [copied, setCopied] = useState(false);
+
+            const handleCopy = () => {
+                const textArea = document.createElement("textarea");
+                textArea.value = code;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            };
+
+            return (
+                <button
+                    onClick={handleCopy}
+                    className={`fixed top-4 left-4 z-50 px-4 py-2 rounded-full border flex items-center gap-2 transition-all active:scale-95 shadow-lg group
+                    ${copied ? 'bg-emerald-500 border-emerald-600 text-white scale-105' : 'glass border-white/50 hover:bg-white hover:scale-105'}`}
+                >
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded transition-colors ${copied ? 'bg-emerald-700 text-emerald-100' : 'text-gray-500 bg-gray-100 group-hover:bg-emerald-100 group-hover:text-emerald-600'}`}>{label}</span>
+                    <span className={`font-mono font-black text-lg tracking-widest ${copied ? 'text-white' : 'text-gray-800'}`}>
+                        {copied ? "COPIED!" : code}
+                    </span>
+                    {copied ? <i data-lucide="check" className="w-4 h-4 text-white"></i> : <i data-lucide="copy" className="w-4 h-4 text-gray-400 group-hover:text-emerald-500"></i>}
+                </button>
+            );
+        };
+
+        const LangSwitcher = ({ lang, setLang }) => (
+            <button
+                onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
+                className="fixed top-4 right-4 z-50 glass px-3 py-2 rounded-full border border-white/50 flex items-center gap-1 hover:bg-white transition-all shadow-lg active:scale-95"
+            >
+                <span className="text-xl">🌐</span>
+                <span className="text-xs font-bold text-gray-600 w-8 text-center">{lang.toUpperCase()}</span>
+            </button>
+        );
+
+        const TopicListModal = ({ onClose, lang, t }) => {
+            const [activeCategory, setActiveCategory] = useState("cat_all");
+            // データからキーを取得
+            const cats = Object.keys(TOPICS_DATA[lang]);
+            const categories = ["cat_all", ...cats];
+
+            const getTopics = () => {
+                if (activeCategory === "cat_all") {
+                    let all = [];
+                    Object.values(TOPICS_DATA[lang]).forEach(arr => all.push(...arr));
+                    return all;
+                }
+                return TOPICS_DATA[lang][activeCategory] || [];
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in" onClick={onClose}>
+                    <div className="bg-white rounded-3xl w-full max-w-2xl h-[80vh] shadow-2xl flex flex-col overflow-hidden pop-in" onClick={e => e.stopPropagation()}>
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-bold text-gray-700 flex items-center"><i data-lucide="book-open" className="w-5 h-5 mr-2 text-emerald-500"></i>{t.book} ({getTopics().length})</h3>
+                            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><i data-lucide="x" className="w-6 h-6 text-gray-400"></i></button>
+                        </div>
+                        <div className="flex overflow-x-auto p-3 gap-2 border-b border-gray-100 no-scrollbar bg-white">
+                            {categories.map(cat => (
+                                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${activeCategory === cat ? 'bg-emerald-500 text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{t[cat] || cat}</button>
+                            ))}
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50">
+                            <div className="grid gap-2">{getTopics().map((topic, i) => (<div key={i} className="bg-white p-3 rounded-xl border border-gray-100 text-sm text-gray-600 font-medium shadow-sm hover:shadow-md transition-shadow flex items-start"><span className="text-emerald-300 font-bold mr-2 text-xs mt-0.5">#{i+1}</span>{topic}</div>))}</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- メインアプリ ---
+        const App = () => {
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
+
+            // 言語設定
+            const [lang, setLang] = useState(() => {
+                const browserLang = navigator.language || navigator.userLanguage;
+                return browserLang.startsWith('ja') ? 'ja' : 'en';
+            });
+            const t = TRANSLATIONS[lang]; // 現在の言語リソース
+
+            const [myId, setMyId] = useState(null);
+            const [myName, setMyName] = useState("");
+            const [inputRoomId, setInputRoomId] = useState("");
+            const [status, setStatus] = useState("SETUP");
+            const [isConnecting, setIsConnecting] = useState(false);
+            const [errorMsg, setErrorMsg] = useState("");
+            const [isHost, setIsHost] = useState(false);
+            const [showTopicList, setShowTopicList] = useState(false);
+
+            const [gameState, setGameState] = useState({
+                phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all' },
+                currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {}
+            });
+
+            // 演出管理Effect
+            useEffect(() => {
+                if (gameState.phase === 'RESULT') {
+                    const isRoundHost = myId === gameState.currentHostId;
+                    if (isRoundHost) {
+                        const hasCorrectGuesser = gameState.players.some(p => p.id !== gameState.currentHostId && gameState.guesses[p.id] === gameState.targetTopicIndex);
+                        if (hasCorrectGuesser) triggerConfetti(); else triggerSadConfetti();
+                    } else {
+                        const myGuess = gameState.guesses[myId];
+                        const isCorrect = myGuess === gameState.targetTopicIndex;
+                        if (isCorrect) triggerConfetti(); else triggerSadConfetti();
+                    }
+                } else if (gameState.phase === 'GAMEOVER') {
+                    triggerConfetti();
+                }
+            }, [gameState.phase, gameState.currentRound]);
+
+            // ブラウザ閉じ/リロード検知
+            useEffect(() => {
+                const handleBeforeUnload = () => {
+                    if (!isHost && hostConnRef.current && hostConnRef.current.open) {
+                        hostConnRef.current.send({ type: 'LEAVE', payload: { id: myId } });
+                    }
+                };
+                window.addEventListener('beforeunload', handleBeforeUnload);
+                return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+            }, [isHost, myId]);
+
+            const peerRef = useRef(null);
+            const connsRef = useRef([]); // Host用
+            const hostConnRef = useRef(null); // Client用
+            const stateRef = useRef(gameState);
+
+            useEffect(() => { stateRef.current = gameState; }, [gameState]);
+
+            // Helper to get text based on current language
+            const getTopicText = (topicObj, language) => {
+                if (!topicObj || typeof topicObj !== 'object') return "";
+                try {
+                    return TOPICS_DATA[language][topicObj.cat][topicObj.idx];
+                } catch (e) {
+                    return "Error";
+                }
+            };
+
+            // --- P2P Logic ---
+            const initPeer = useCallback((id = null) => {
+                const peer = new window.Peer(id, { debug: 1 });
+                peer.on('open', (pid) => {
+                    setMyId(pid);
+                    if (id) setIsConnecting(false);
+                });
+                peer.on('error', (err) => {
+                    console.error(err);
+                    setErrorMsg(t.connError + ": " + err.type);
+                    setIsConnecting(false);
+                    setTimeout(() => setErrorMsg(""), 3000);
+                });
+                peer.on('connection', (conn) => {
+                    conn.on('open', () => { connsRef.current.push(conn); conn.send({ type: 'STATE_UPDATE', payload: stateRef.current }); });
+                    conn.on('data', (data) => handleHostData(data, conn));
+                    conn.on('close', () => { connsRef.current = connsRef.current.filter(c => c !== conn); });
+                });
+                peerRef.current = peer;
+            }, [t]);
+
+            const connectToHost = (hostId) => {
+                if (!peerRef.current) return;
+                const conn = peerRef.current.connect(hostId);
+                conn.on('open', () => {
+                    hostConnRef.current = conn;
+                    conn.send({ type: 'JOIN', payload: { name: myName, id: peerRef.current.id } });
+                });
+                conn.on('data', (data) => {
+                    if (data.type === 'STATE_UPDATE') {
+                        setGameState(data.payload);
+                        if (status === 'SETUP') {
+                            setStatus(data.payload.phase === 'LOBBY' ? 'LOBBY' : 'GAME');
+                            setIsConnecting(false);
+                        }
+                    } else if (data.type === 'RESET_GAME') {
+                        performReset();
+                    }
+                });
+                conn.on('close', () => {
+                    alert(t.hostLeft);
+                    performReset();
+                });
+                conn.on('error', () => {
+                    setErrorMsg(t.connFail);
+                    setIsConnecting(false);
+                });
+            };
+
+            const broadcast = (newState) => { connsRef.current.forEach(c => { if (c.open) c.send({ type: 'STATE_UPDATE', payload: newState }); }); };
+
+            const broadcastEvent = (type, payload = null) => {
+                connsRef.current.forEach(c => { if (c.open) c.send({ type, payload }); });
+            };
+
+            const handleHostData = (data, conn) => {
+                const current = stateRef.current;
+
+                if (data.type === 'JOIN') {
+                    if (current.players.find(p => p.id === data.payload.id)) return;
+                    const newPlayer = { ...data.payload, score: 0 };
+                    const newState = { ...current, players: [...current.players, newPlayer] };
+                    setGameState(newState); broadcast(newState);
+
+                } else if (data.type === 'LEAVE') {
+                    const newPlayers = current.players.filter(p => p.id !== data.payload.id);
+                    const newState = { ...current, players: newPlayers };
+                    setGameState(newState); broadcast(newState);
+
+                } else if (data.type === 'SUBMIT_GUESS') {
+                    const { playerId, topicIndex } = data.payload;
+                    const newGuesses = { ...current.guesses, [playerId]: topicIndex };
+                    let newState = { ...current, guesses: newGuesses };
+                    const guessers = current.players.filter(p => p.id !== current.currentHostId);
+                    if (Object.keys(newGuesses).length >= guessers.length) calculateScores(newState);
+                    else { setGameState(newState); broadcast(newState); }
+
+                } else if (data.type === 'UPDATE_RANKING') {
+                    const { rankedIds } = data.payload;
+                    const newState = { ...current, rankedPlayerIds: rankedIds };
+                    setGameState(newState); broadcast(newState);
+
+                } else if (data.type === 'SUBMIT_RANKING') {
+                    const { rankedIds } = data.payload;
+                    const newState = { ...current, phase: 'GUESSING', rankedPlayerIds: rankedIds };
+                    setGameState(newState); broadcast(newState);
+                }
+            };
+
+            const calculateScores = (currentState) => {
+                const targetIdx = currentState.targetTopicIndex;
+                const hostId = currentState.currentHostId;
+                let correctCount = 0;
+                const updatedPlayers = currentState.players.map(p => {
+                    if (p.id === hostId) return p;
+                    const guess = currentState.guesses[p.id];
+                    if (guess === targetIdx) { correctCount++; return { ...p, score: p.score + 100 }; }
+                    return p;
+                });
+                const finalPlayers = updatedPlayers.map(p => {
+                    if (p.id === hostId) return { ...p, score: p.score + (correctCount * 50) };
+                    return p;
+                });
+                const newState = { ...currentState, phase: 'RESULT', players: finalPlayers };
+                setGameState(newState); broadcast(newState);
+            };
+
+            const startGame = () => {
+                if (gameState.players.length < 2) return;
+                const turnOrder = shuffleArray(gameState.players.map(p => p.id));
+                const newState = { ...gameState, turnOrder, currentRound: 0 };
+                startRound(newState);
+            };
+
+            const startRound = (baseState = gameState) => {
+                const nextRound = baseState.currentRound + 1;
+                if (nextRound > baseState.settings.totalRounds) {
+                    const endState = { ...baseState, phase: 'GAMEOVER' };
+                    setGameState(endState); broadcast(endState); return;
+                }
+                const nextHostId = baseState.turnOrder[(nextRound - 1) % baseState.turnOrder.length];
+
+                // お題ID抽出
+                let availableTopics = [];
+                if (baseState.settings.category === 'cat_all') {
+                    Object.keys(TOPICS_DATA.ja).forEach(cat => {
+                        TOPICS_DATA.ja[cat].forEach((_, idx) => {
+                            availableTopics.push({ cat, idx });
+                        });
+                    });
+                } else {
+                    const cat = baseState.settings.category;
+                    TOPICS_DATA.ja[cat].forEach((_, idx) => {
+                        availableTopics.push({ cat, idx });
+                    });
+                }
+
+                // フォールバック
+                if (availableTopics.length < 4) {
+                    availableTopics = [];
+                    Object.keys(TOPICS_DATA.ja).forEach(cat => {
+                        TOPICS_DATA.ja[cat].forEach((_, idx) => {
+                            availableTopics.push({ cat, idx });
+                        });
+                    });
+                }
+
+                const topics = shuffleArray(availableTopics).slice(0, 4);
+                const targetIndex = Math.floor(Math.random() * 4);
+
+                const newState = {
+                    ...baseState, phase: 'RANKING', currentRound: nextRound, currentHostId: nextHostId,
+                    topics, targetTopicIndex: targetIndex, rankedPlayerIds: shuffleArray(baseState.players.map(p => p.id)), guesses: {}
+                };
+                setGameState(newState); broadcast(newState);
+            };
+
+            const movePlayer = (idx, dir) => {
+                const newOrder = [...gameState.rankedPlayerIds];
+                if (dir === -1 && idx > 0) [newOrder[idx], newOrder[idx-1]] = [newOrder[idx-1], newOrder[idx]];
+                if (dir === 1 && idx < newOrder.length - 1) [newOrder[idx], newOrder[idx+1]] = [newOrder[idx+1], newOrder[idx]];
+
+                setGameState(prev => ({ ...prev, rankedPlayerIds: newOrder }));
+
+                if (isHost) broadcast({ ...gameState, rankedPlayerIds: newOrder });
+                else { const conn = hostConnRef.current; if (conn) conn.send({ type: 'UPDATE_RANKING', payload: { rankedIds: newOrder } }); }
+            };
+
+            const submitRanking = (rankedIds) => {
+                const idsToSubmit = rankedIds || gameState.rankedPlayerIds;
+                if (isHost) {
+                    const newState = { ...gameState, phase: 'GUESSING', rankedPlayerIds: idsToSubmit };
+                    setGameState(newState); broadcast(newState);
+                } else {
+                    const conn = hostConnRef.current;
+                    if (conn) conn.send({ type: 'SUBMIT_RANKING', payload: { rankedIds: idsToSubmit } });
+                }
+            };
+
+            const submitGuess = (topicIndex) => {
+                if (isHost) {
+                    handleHostData({ type: 'SUBMIT_GUESS', payload: { playerId: myId, topicIndex } }, null);
+                } else {
+                    const conn = hostConnRef.current;
+                    if (conn) {
+                        conn.send({ type: 'SUBMIT_GUESS', payload: { playerId: myId, topicIndex } });
+                        setGameState(prev => ({ ...prev, guesses: { ...prev.guesses, [myId]: topicIndex } }));
+                    }
+                }
+            };
+
+            const resetGame = () => {
+                if (isHost) {
+                    broadcastEvent('RESET_GAME');
+                    setTimeout(() => performReset(), 500);
+                } else {
+                    const conn = hostConnRef.current;
+                    if (conn && conn.open) {
+                        conn.send({ type: 'LEAVE', payload: { id: myId } });
+                    }
+                    setTimeout(() => performReset(), 100);
+                }
+            };
+
+            const performReset = () => {
+                if (peerRef.current) { peerRef.current.destroy(); peerRef.current = null; }
+                setMyId(null); setInputRoomId(""); setIsHost(false); setIsConnecting(false);
+                setGameState({ phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all' }, currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {} });
+                setStatus("SETUP");
+            };
+
+            const returnToLobby = () => {
+                const newState = { ...gameState, phase: 'LOBBY', currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {}, players: gameState.players.map(p => ({ ...p, score: 0 })) };
+                setGameState(newState); broadcast(newState);
+            };
+
+            const createRoom = () => {
+                if (!myName) return setErrorMsg(t.inputName);
+                setIsConnecting(true);
+                const hostId = generateId();
+                setIsHost(true); setMyId(hostId);
+                setGameState(prev => ({ ...prev, players: [{ id: hostId, name: myName, score: 0 }] }));
+                initPeer(hostId); setStatus('LOBBY');
+            };
+
+            const joinRoom = () => {
+                if (!myName) return setErrorMsg(t.inputName);
+                if (inputRoomId.length < 5) return setErrorMsg(t.checkId);
+                setIsConnecting(true);
+                const finalRoomId = inputRoomId.toUpperCase();
+                setIsHost(false);
+                setInputRoomId(finalRoomId);
+                initPeer();
+            };
+
+            useEffect(() => {
+                if (!isHost && myId && inputRoomId && status === 'SETUP') connectToHost(inputRoomId);
+            }, [myId]);
+
+            const roomCode = isHost ? myId : inputRoomId;
+            const currentHostPlayer = gameState.players.find(p => p.id === gameState.currentHostId);
+            const isMyTurn = gameState.currentHostId === myId;
+
+            // --- Render ---
+            if (status === 'SETUP') {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 fade-in">
+                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <button onClick={() => setShowTopicList(true)} className="absolute top-6 right-6 p-3 glass rounded-full hover:bg-white transition-all text-white/90 hover:text-emerald-600 shadow-lg group z-40" style={{top: '4.5rem'}}><i data-lucide="book-open" className="w-6 h-6"></i><span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">{t.book}</span></button>
+                        <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl">
+                            <div className="text-center mb-6"><h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 mb-2 tracking-tight float">{t.title}</h1><p className="text-gray-500 text-xs font-bold">{t.subtitle}</p></div>
+                            {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
+                            <div className="space-y-5">
+                                <div className="group"><label className="text-xs font-bold text-gray-400 ml-1">{t.nickname}</label><input type="text" value={myName} onChange={e => setMyName(e.target.value)} placeholder={t.nicknamePlaceholder} className="w-full bg-gray-50/50 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-400 focus:bg-white outline-none font-bold text-gray-700 transition-all" /></div>
+                                <div className="group">
+                                    <label className="text-xs font-bold text-gray-400 ml-1">{t.roomId} <span className="font-normal text-gray-300">{t.roomIdNote}</span></label>
+                                    <input type="text" value={inputRoomId} onChange={e => setInputRoomId(e.target.value)} placeholder={t.roomIdPlaceholder} className="w-full text-center tracking-[0.2em] font-mono text-xl uppercase-style bg-gray-50/50 border-2 border-gray-200 focus:border-indigo-400 focus:bg-white rounded-xl py-3 outline-none font-bold text-gray-700 transition-all" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <button onClick={createRoom} disabled={!myName || isConnecting} className={`py-4 rounded-xl font-black shadow-lg transition-all transform flex flex-col items-center justify-center ${(!myName || isConnecting) ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100' : 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white hover:shadow-emerald-300/50 hover:scale-[1.02] active:scale-95'}`}><i data-lucide="plus-square" className="mb-1 w-6 h-6"></i>{t.createRoom}</button>
+                                    <button onClick={joinRoom} disabled={inputRoomId.length < 5 || !myName || isConnecting} className={`py-4 rounded-xl font-black shadow-lg transition-all transform flex flex-col items-center justify-center ${(inputRoomId.length < 5 || !myName || isConnecting) ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100' : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-300/50 hover:scale-[1.02] active:scale-95'}`}>
+                                        {isConnecting ? <i data-lucide="loader" className="mb-1 w-6 h-6 animate-spin"></i> : <i data-lucide="log-in" className="mb-1 w-6 h-6"></i>}
+                                        {isConnecting ? t.connecting : t.joinRoom}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
+
+                        <div className="max-w-md mx-auto mt-8 glass rounded-xl p-6 text-gray-700 text-left">
+                            <h2 className="text-lg font-bold mb-3 text-emerald-600 flex items-center"><i data-lucide="info" className="mr-2 w-5 h-5"></i>{t.aboutTitle}</h2>
+                            <p className="mb-4 text-xs leading-relaxed">{t.aboutDesc}</p>
+                            <h3 className="font-bold text-gray-800 mt-4 mb-2 text-xs">{t.howToPlay}</h3>
+                            <ol className="list-decimal list-inside space-y-2 text-[10px] bg-gray-50/50 p-3 rounded-lg border border-gray-200/50">
+                                <li>{t.step1}</li>
+                                <li>{t.step2}</li>
+                                <li>{t.step3}</li>
+                                <li>{t.step4}</li>
+                            </ol>
+                            <div className="mt-4 p-3 bg-emerald-50/80 border border-emerald-200/50 rounded-lg flex items-start">
+                                <i data-lucide="video" className="w-4 h-4 text-emerald-500 mr-2 mt-0.5 shrink-0"></i>
+                                <div>
+                                    <h4 className="font-bold text-emerald-700 text-xs mb-1">{t.distributionTitle}</h4>
+                                    <p className="text-[10px] text-emerald-600 leading-relaxed">{t.distributionDesc}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <footer className="text-center mt-8 text-xs text-white/70 font-bold">{t.footer}</footer>
+                    </div>
+                );
+            }
+
+            if (gameState.phase === 'LOBBY') {
+                return (
+                    <div className="min-h-screen pt-20 px-4 pb-24 slide-up">
+                        <RoomBadge code={roomCode} label={t.room} />
+                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <div className="max-w-2xl mx-auto">
+                            <div className="glass rounded-3xl p-8 mb-8 shadow-xl">
+                                <h2 className="text-3xl font-black text-gray-800 text-center mb-2">{t.lobby}</h2>
+                                <p className="text-center text-gray-500 font-bold mb-8 text-sm">{t.waitingMembers} ({gameState.players.length})</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                                    {gameState.players.map((p, idx) => (
+                                        <div key={p.id} className="bg-white/80 p-4 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center pop-in relative" style={{animationDelay: `${idx * 0.1}s`}}>
+                                            <div className="float" style={{animationDelay: `${idx * 0.5}s`}}><Avatar name={p.name} seed={p.id} size="lg" /></div>
+                                            <span className="mt-3 font-bold text-gray-700 truncate w-full text-center flex items-center justify-center">
+                                                {p.name}
+                                                {p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1 border border-emerald-200 shrink-0">{t.you}</span>}
+                                            </span>
+                                            {p.id === gameState.players[0].id && <span className="absolute top-2 right-2 text-[10px] bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full font-bold">{t.host}</span>}
+                                        </div>
+                                    ))}
+                                    {[...Array(Math.max(0, 3 - gameState.players.length))].map((_, i) => <div key={i} className="border-2 border-dashed border-gray-300/50 rounded-2xl flex items-center justify-center p-4 opacity-50"><span className="text-xs font-bold text-gray-500">Waiting...</span></div>)}
+                                </div>
+                                {isHost ? (
+                                    <div className="bg-white/50 p-6 rounded-2xl border border-white/50 mb-4">
+                                        <label className="block text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">{t.gameSettings}</label>
+                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 shadow-inner mb-4">
+                                            <span className="font-bold text-gray-700 text-sm pl-2">{t.rounds}</span>
+                                            <select value={gameState.settings.totalRounds} onChange={e => { const newState = { ...gameState, settings: { ...gameState.settings, totalRounds: parseInt(e.target.value) } }; setGameState(newState); broadcast(newState); }} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 font-bold text-indigo-600 outline-none text-sm"><option value="3">3</option><option value="5">5</option><option value="8">8</option><option value="10">10</option></select>
+                                        </div>
+                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 shadow-inner mb-4">
+                                            <span className="font-bold text-gray-700 text-sm pl-2">{t.category}</span>
+                                            <select value={gameState.settings.category} onChange={e => { const newState = { ...gameState, settings: { ...gameState.settings, category: e.target.value } }; setGameState(newState); broadcast(newState); }} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 font-bold text-indigo-600 outline-none text-sm max-w-[60%] truncate"><option value="cat_all">{t.cat_all}</option>{Object.keys(TOPICS_DATA[lang]).map(cat => <option key={cat} value={cat}>{t[cat] || cat}</option>)}</select>
+                                        </div>
+                                        <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-inner mb-6">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-bold text-gray-700 text-sm pl-2">{gameState.settings.realtimeRanking ? t.modeOn : t.modeOff}</span>
+                                                <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                                    <input type="checkbox" className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked={gameState.settings.realtimeRanking} onChange={e => { const newState = { ...gameState, settings: { ...gameState.settings, realtimeRanking: e.target.checked } }; setGameState(newState); broadcast(newState); }} /><label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer ${gameState.settings.realtimeRanking ? 'bg-emerald-400' : 'bg-gray-300'}`}></label>
+                                                </div>
+                                            </div>
+                                            <p className="text-[10px] text-gray-400 pl-2 leading-tight">{gameState.settings.realtimeRanking ? t.modeDescOn : t.modeDescOff}</p>
+                                        </div>
+                                        <button onClick={startGame} disabled={gameState.players.length < 2} className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all transform active:scale-95 ${gameState.players.length < 2 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:scale-[1.02]'}`}>{t.startGame}</button>
+                                    </div>
+                                ) : (
+                                    <div className="text-center bg-white/50 p-6 rounded-2xl border border-white/50 animate-pulse"><p className="font-bold text-gray-600">{t.hostSetting}</p><div className="text-xs text-gray-400 mt-2 flex flex-col gap-1 items-center"><span className="bg-white/50 px-2 py-1 rounded">{t.rounds}: {gameState.settings.totalRounds}</span><span className="bg-white/50 px-2 py-1 rounded">{t.category}: {t[gameState.settings.category]}</span><span className="bg-white/50 px-2 py-1 rounded">{t.mode}: {gameState.settings.realtimeRanking ? t.modeOn : t.modeOff}</span></div></div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameState.phase === 'RANKING') {
+                const showRanking = isMyTurn || gameState.settings.realtimeRanking;
+                return (
+                    <div className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
+                        <RoomBadge code={roomCode} label={t.room} />
+                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <div className="max-w-md mx-auto">
+                            <div className="text-center mb-6">
+                                <span className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg">{t.round} {gameState.currentRound} / {gameState.settings.totalRounds}</span>
+                                {isMyTurn ? (<><h2 className="text-2xl font-black mt-4 drop-shadow-md">{t.topicTitle}</h2><div className="mt-4 p-6 glass-dark rounded-2xl border border-white/20 shadow-xl pop-in"><p className="text-xl font-black text-yellow-300 drop-shadow-sm leading-relaxed">{getTopicText(gameState.topics[gameState.targetTopicIndex], lang)}</p></div></>) : (<><h2 className="text-2xl font-black mt-4 drop-shadow-md">{t.hostWaitTitle}</h2><div className="mt-4 p-4 glass-dark rounded-2xl border border-white/10 shadow-inner"><p className="text-sm font-bold text-white/70">{t.topicUnknown}</p></div></>)}
+                            </div>
+                            {showRanking ? (
+                                <div className="space-y-3 mb-8">
+                                    {gameState.rankedPlayerIds.map((pid, idx) => {
+                                        const p = gameState.players.find(pl => pl.id === pid);
+                                        return (
+                                            <div key={pid} className="flex items-center glass-dark p-3 rounded-xl border border-white/10 shadow-sm transition-all list-move">
+                                                <div className="w-8 font-black text-white/50 text-center text-xl">{idx+1}</div>
+                                                <Avatar name={p.name} seed={p.id} size="sm" />
+                                                <span className="ml-3 font-bold flex-1 truncate text-white flex items-center">
+                                                    {p.name}
+                                                    {p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200 shrink-0">{t.you}</span>}
+                                                </span>
+                                                {isMyTurn && <div className="flex flex-col gap-1 ml-2"><button onClick={()=>movePlayer(idx, -1)} className="p-2 hover:bg-white/20 rounded active:bg-white/30 transition-colors"><i data-lucide="chevron-up" className="w-6 h-6"></i></button><button onClick={()=>movePlayer(idx, 1)} className="p-2 hover:bg-white/20 rounded active:bg-white/30 transition-colors"><i data-lucide="chevron-down" className="w-6 h-6"></i></button></div>}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="glass-dark p-8 rounded-3xl border border-white/10 text-center mb-8 pop-in"><div className="flex justify-center mb-4 gap-2"><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce"></div><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce delay-100"></div><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce delay-200"></div></div><p className="font-bold text-white/80">{t.modeOff}</p><p className="text-xs text-white/50 mt-1">{t.modeDescOff}</p></div>
+                            )}
+                            {isMyTurn && <button onClick={() => submitRanking()} className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black rounded-xl shadow-lg hover:shadow-orange-500/30 transition transform hover:scale-[1.02] active:scale-95">{t.decide}</button>}
+                            {!isMyTurn && showRanking && <div className="text-center text-white/60 font-bold text-xs animate-pulse"><i data-lucide="loader" className="w-4 h-4 inline-block mr-1 animate-spin"></i>{t.hostThinking}</div>}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameState.phase === 'GUESSING') {
+                const hasGuessed = gameState.guesses[myId] !== undefined;
+                return (
+                    <div className="min-h-screen pt-20 px-4 pb-24 slide-up">
+                        <RoomBadge code={roomCode} label={t.room} />
+                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+                            <div className="glass p-6 rounded-3xl shadow-xl h-fit">
+                                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2"><h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">{t.rankingBy} {currentHostPlayer?.name}</h3><span className="bg-indigo-100 text-indigo-600 text-[10px] px-2 py-1 rounded font-bold">{t.round} {gameState.currentRound}</span></div>
+                                <div className="space-y-3">{gameState.rankedPlayerIds.map((pid, idx) => { const p = gameState.players.find(pl => pl.id === pid); return (<div key={pid} className="flex items-center pop-in" style={{animationDelay: `${idx * 0.1}s`}}><div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm mr-3 shrink-0 shadow-sm ${idx===0?'bg-yellow-400 text-white':idx===1?'bg-gray-300 text-white':idx===2?'bg-amber-600 text-white':'bg-gray-100 text-gray-400'}`}>{idx+1}</div><div className="bg-white/80 p-2 pr-4 rounded-full flex items-center flex-1 border border-white shadow-sm"><Avatar name={p.name} seed={p.id} size="sm" />
+                                <div className="ml-3 flex-1 flex items-center min-w-0">
+                                    <span className="font-bold text-gray-700 truncate">{p.name}</span>
+                                    {p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200 shrink-0">{t.you}</span>}
+                                </div></div></div>); })}</div>
+                            </div>
+                            <div className="flex flex-col">
+                                <div className="glass p-6 rounded-3xl shadow-xl flex-1 relative overflow-hidden">
+                                    <h3 className="text-lg font-black text-gray-800 mb-6 relative z-10 flex items-center"><span className="bg-emerald-100 text-emerald-600 p-2 rounded-lg mr-2"><i data-lucide="help-circle" className="w-5 h-5"></i></span>{t.guessTitle}</h3>
+                                    {isMyTurn ? (
+                                        <div className="flex flex-col items-center justify-center min-h-[300px]">
+                                            <div className="mb-8 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl text-center w-full shadow-inner"><p className="text-xs font-bold text-yellow-600 mb-1 uppercase tracking-wider">{t.yourTopic}</p><p className="text-lg font-black text-gray-800">{getTopicText(gameState.topics[gameState.targetTopicIndex], lang)}</p></div>
+                                            <p className="text-gray-500 font-bold mb-6 text-sm">{t.waitAnswer}</p>
+                                            <div className="flex flex-wrap justify-center gap-3">{gameState.players.filter(p => p.id !== myId).map(p => (<div key={p.id} className={`transition-all duration-500 relative ${gameState.guesses[p.id] !== undefined ? 'transform scale-110' : 'opacity-30 grayscale'}`}><Avatar name={p.name} seed={p.id} />{gameState.guesses[p.id] !== undefined && <div className="absolute -top-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white animate-bounce"></div>}</div>))}</div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid gap-3 relative z-10">
+                                            {gameState.topics.map((topic, idx) => (
+                                                <button key={idx} onClick={() => submitGuess(idx)} disabled={hasGuessed} className={`p-4 rounded-xl text-left border-2 font-bold transition-all relative overflow-hidden text-sm group ${hasGuessed && gameState.guesses[myId] === idx ? 'border-emerald-500 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-200' : 'border-gray-200/50 bg-white/50 hover:bg-white hover:border-indigo-300 hover:shadow-md text-gray-600'} ${hasGuessed && gameState.guesses[myId] !== idx ? 'opacity-40' : ''}`}>{getTopicText(topic, lang)}{hasGuessed && gameState.guesses[myId] === idx && <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pop-in"><i data-lucide="check-circle" className="w-6 h-6"></i></div>}</button>
+                                            ))}
+                                            {hasGuessed && <div className="text-center mt-4 text-emerald-600 font-bold text-xs animate-pulse">{t.waitOthers}</div>}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameState.phase === 'RESULT' || gameState.phase === 'GAMEOVER') {
+                const targetTopic = gameState.topics[gameState.targetTopicIndex];
+                const isGameOver = gameState.phase === 'GAMEOVER';
+
+                const roundCorrectCount = gameState.players.filter(p => p.id !== gameState.currentHostId && gameState.guesses[p.id] === gameState.targetTopicIndex).length;
+
+                return (
+                    <div className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
+                        <RoomBadge code={roomCode} label={t.room} />
+                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <div className="max-w-2xl mx-auto">
+                            <div className="text-center py-6">
+                                <span className="text-white/70 font-bold text-[10px] tracking-widest uppercase mb-2 block fade-in">{isGameOver ? t.finalResult : t.result}</span>
+                                {isGameOver ? <h2 className="text-5xl font-black text-yellow-300 mb-2 drop-shadow-lg pop-in">{t.gameOver}</h2> : <div className="pop-in"><div className="inline-block bg-white/20 px-4 py-1 rounded-full text-white text-[10px] font-bold mb-4 backdrop-blur-sm">{t.correctTopic}</div><h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-orange-300 drop-shadow-sm leading-tight p-2">{getTopicText(targetTopic, lang)}</h2></div>}
+                            </div>
+                            <div className="glass-dark rounded-3xl p-6 border border-white/10 mb-8 shadow-2xl">
+                                <div className="space-y-4">
+                                    {gameState.players.sort((a,b) => b.score - a.score).map((p, idx) => {
+                                        const isRoundHost = p.id === gameState.currentHostId;
+                                        const guessIdx = gameState.guesses[p.id];
+                                        const isCorrect = guessIdx === gameState.targetTopicIndex;
+                                        return (
+                                            <div key={p.id} className="bg-black/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-white/5 relative overflow-hidden transition-all hover:bg-black/30" style={{animation: `slideUp 0.5s ease-out ${idx * 0.1}s forwards`, opacity: 0, transform: 'translateY(20px)'}}>
+                                                <div className="flex items-center mb-3 sm:mb-0 z-10 w-full sm:w-auto"><span className={`w-6 font-black text-center mr-2 ${idx===0 ? 'text-yellow-400 text-2xl drop-shadow' : 'text-indigo-200'}`}>{idx + 1}</span><Avatar name={p.name} seed={p.id} /><div className="ml-3 flex-1"><div className="font-bold text-white flex items-center text-lg">{p.name}{isRoundHost && !isGameOver && <span className="ml-2 text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-full font-black">{t.host}</span>}{idx === 0 && isGameOver && <span className="ml-2 text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded-full font-black animate-pulse">{t.winner}</span>}{p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200">{t.you}</span>}</div>{!isRoundHost && !isGameOver && (<div className="text-xs text-white/60 mt-1 max-w-[200px] truncate"><span className="opacity-70">Guess:</span> <span className={isCorrect ? "text-green-300 font-bold" : "text-red-300"}>{getTopicText(gameState.topics[guessIdx], lang) || "---"}</span></div>)}</div></div>
+                                                <div className="flex flex-row sm:flex-col items-center sm:items-end w-full sm:w-auto justify-between sm:justify-center z-10 pl-8 sm:pl-0">{!isGameOver && (<div className="mb-1">{isRoundHost ? (roundCorrectCount > 0 ? <span className="text-pink-300 text-[10px] font-bold">{t.bonus} (+{roundCorrectCount * 50})</span> : <span className="text-gray-400 text-[10px] font-bold">{t.allWrong} (+0)</span>) : isCorrect ? <span className="bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-lg shadow-green-500/50"><i data-lucide="check" className="w-3 h-3 mr-1"></i> {t.nice}</span> : <span className="text-red-300 text-[10px] font-bold opacity-60">{t.miss}</span>}</div>)}<div className="text-2xl font-black text-white tracking-tight flex items-baseline drop-shadow-md">{p.score} <span className="text-sm text-white/50 ml-1">pt</span></div></div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            {isHost && !isGameOver && <button onClick={() => startRound()} className="w-full py-4 bg-white text-indigo-900 font-black rounded-xl text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all">{t.nextRound}</button>}
+                            {isGameOver && (
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button onClick={returnToLobby} className="py-4 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl backdrop-blur-sm border border-white/30 transition-all active:scale-95">{t.returnLobby}</button>
+                                    <button onClick={resetGame} className="py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black rounded-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all">{t.returnTitle}</button>
+                                </div>
+                            )}
+                            {!isHost && !isGameOver && <div className="text-center text-white/60 font-bold text-xs animate-pulse">{t.hostThinking}</div>}
+                        </div>
+                    </div>
+                );
+            }
+            return null;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
