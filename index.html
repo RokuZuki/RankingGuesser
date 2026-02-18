@@ -1,9 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5871148617904389" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5871148617904389" crossorigin="anonymous"></script>
+
     <title>Ranking Guesser Party</title>
 
     <!-- OGP設定 -->
@@ -27,15 +30,19 @@
     <style>
         body {
             font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            touch-action: manipulation;
             min-height: 100vh;
             color: #333;
             -webkit-user-select: none;
             user-select: none;
+            background-color: #7dd3fc;
+            transition: background 0.5s ease;
         }
+
+            body.animated-bg {
+                background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+                background-size: 400% 400%;
+                animation: gradientBG 15s ease infinite;
+            }
 
         @keyframes gradientBG {
             0% {
@@ -180,6 +187,7 @@
                 you: "YOU",
                 gameSettings: "ゲーム設定",
                 rounds: "ラウンド数",
+                topicOptions: "選択肢の数",
                 category: "出題カテゴリ",
                 mode: "実況モード",
                 modeOn: "ON (見える)",
@@ -187,6 +195,8 @@
                 modeDescOn: "親の操作がリアルタイムで参加者に共有されます",
                 modeDescOff: "親が決定するまで、参加者はランキングを見れません",
                 startGame: "ゲームスタート",
+                leaveRoom: "退出する",
+                dissolveRoom: "部屋を解散する",
                 hostSetting: "ホストが設定中...",
                 round: "ROUND",
                 topicTitle: "お題に合わせて並べ替えろ！",
@@ -210,6 +220,8 @@
                 winner: "WINNER!",
                 nextRound: "次のラウンドへ",
                 returnLobby: "ロビーへ戻る(再戦)",
+                abortGame: "ゲームを中断してロビーへ戻る",
+                confirmAbort: "本当に戻りますか？(Click to confirm)",
                 returnTitle: "タイトルに戻る",
                 hostLeft: "ホストが退出しました。タイトルに戻ります。",
                 connError: "通信エラー",
@@ -256,6 +268,7 @@
                 you: "YOU",
                 gameSettings: "Game Settings",
                 rounds: "Rounds",
+                topicOptions: "Choices",
                 category: "Category",
                 mode: "Live Mode",
                 modeOn: "ON (Visible)",
@@ -263,6 +276,8 @@
                 modeDescOn: "Players can see the host sorting in real-time.",
                 modeDescOff: "Players cannot see the ranking until the host decides.",
                 startGame: "Start Game",
+                leaveRoom: "Leave Room",
+                dissolveRoom: "Dissolve Room",
                 hostSetting: "Host is configuring...",
                 round: "ROUND",
                 topicTitle: "Sort by the Topic!",
@@ -286,6 +301,8 @@
                 winner: "WINNER!",
                 nextRound: "Next Round",
                 returnLobby: "Back to Lobby",
+                abortGame: "Abort & Return to Lobby",
+                confirmAbort: "Are you sure? (Click to confirm)",
                 returnTitle: "Back to Title",
                 hostLeft: "Host disconnected. Returning to title.",
                 connError: "Connection Error",
@@ -483,7 +500,7 @@
             );
         };
 
-        const RoomBadge = ({ code, label }) => {
+        const RoomBadge = ({ code, label, className = "" }) => {
             const [copied, setCopied] = useState(false);
 
             const handleCopy = () => {
@@ -506,8 +523,8 @@
             return (
                 <button
                     onClick={handleCopy}
-                    className={`fixed top-4 left-4 z-50 px-4 py-2 rounded-full border flex items-center gap-2 transition-all active:scale-95 shadow-lg group
-                    ${copied ? 'bg-emerald-500 border-emerald-600 text-white scale-105' : 'glass border-white/50 hover:bg-white hover:scale-105'}`}
+                    className={`px-4 py-2 rounded-full border flex items-center gap-2 transition-all active:scale-95 shadow-lg group
+                    ${copied ? 'bg-emerald-500 border-emerald-600 text-white scale-105' : 'glass border-white/50 hover:bg-white hover:scale-105'} ${className}`}
                 >
                     <span className={`text-[10px] font-black px-1.5 py-0.5 rounded transition-colors ${copied ? 'bg-emerald-700 text-emerald-100' : 'text-gray-500 bg-gray-100 group-hover:bg-emerald-100 group-hover:text-emerald-600'}`}>{label}</span>
                     <span className={`font-mono font-black text-lg tracking-widest ${copied ? 'text-white' : 'text-gray-800'}`}>
@@ -518,14 +535,49 @@
             );
         };
 
-        const LangSwitcher = ({ lang, setLang }) => (
-            <button
-                onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
-                className="fixed top-4 right-4 z-50 glass px-3 py-2 rounded-full border border-white/50 flex items-center gap-1 hover:bg-white transition-all shadow-lg active:scale-95"
-            >
-                <span className="text-xl">🌐</span>
-                <span className="text-xs font-bold text-gray-600 w-8 text-center">{lang.toUpperCase()}</span>
-            </button>
+        const Header = ({ lang, setLang, onOpenBook, t, roomCode, bgAnim, setBgAnim }) => (
+            <header className="fixed top-0 left-0 w-full z-50 h-16 px-4 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm flex items-center justify-between">
+                <div className="flex items-center">
+                    <span className="font-black text-xl text-white drop-shadow-md tracking-tighter flex items-center gap-1 cursor-default select-none">
+                        <i data-lucide="crown" className="w-6 h-6 text-yellow-300 drop-shadow"></i>
+                        <span className="hidden sm:inline">Ranking Guesser</span>
+                        <span className="sm:hidden">RG</span>
+                    </span>
+                    {roomCode && (
+                        <div className="ml-4 hidden md:block">
+                            <RoomBadge code={roomCode} label={t.room} className="static shadow-none border-white/30" />
+                        </div>
+                    )}
+                </div>
+
+                {roomCode && (
+                    <div className="md:hidden absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 scale-90">
+                         <RoomBadge code={roomCode} label={t.room} className="static shadow-none border-white/30" />
+                    </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                    {/* 背景切り替えボタン */}
+                    <button
+                        onClick={() => setBgAnim(!bgAnim)}
+                        className={`p-2 glass rounded-full transition-all active:scale-95 flex items-center justify-center w-10 h-10 shadow-sm ${bgAnim ? 'text-indigo-600 hover:bg-white' : 'text-gray-400 bg-gray-100 hover:bg-gray-200'}`}
+                        title="Toggle Background"
+                    >
+                        <i data-lucide="palette" className="w-5 h-5"></i>
+                    </button>
+
+                    <button onClick={onOpenBook} className="p-2 glass rounded-full text-emerald-600 hover:bg-white transition-all active:scale-95 flex items-center justify-center w-10 h-10 shadow-sm" title={t.book}>
+                        <i data-lucide="book-open" className="w-5 h-5"></i>
+                    </button>
+                    <button
+                        onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
+                        className="glass px-3 py-1.5 rounded-full text-xs font-black text-emerald-700 hover:bg-white transition-all active:scale-95 flex items-center gap-1 h-10 shadow-sm"
+                    >
+                        <span className="text-base">🌐</span>
+                        {lang.toUpperCase()}
+                    </button>
+                </div>
+            </header>
         );
 
         const TopicListModal = ({ onClose, lang, t }) => {
@@ -544,7 +596,7 @@
             };
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in" onClick={onClose}>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in" onClick={onClose}>
                     <div className="bg-white rounded-3xl w-full max-w-2xl h-[80vh] shadow-2xl flex flex-col overflow-hidden pop-in" onClick={e => e.stopPropagation()}>
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <h3 className="font-bold text-gray-700 flex items-center"><i data-lucide="book-open" className="w-5 h-5 mr-2 text-emerald-500"></i>{t.book} ({getTopics().length})</h3>
@@ -563,6 +615,38 @@
             );
         };
 
+        // 安全な2段階認証ボタン
+        const AbortButton = ({ onClick, text, confirmText }) => {
+            const [isConfirming, setIsConfirming] = useState(false);
+            const timeoutRef = useRef(null);
+
+            const handleClick = () => {
+                if (isConfirming) {
+                    onClick();
+                    setIsConfirming(false);
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                } else {
+                    setIsConfirming(true);
+                    // 3秒後にリセット
+                    timeoutRef.current = setTimeout(() => setIsConfirming(false), 3000);
+                }
+            };
+
+            // Clean up
+            useEffect(() => {
+                return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+            }, []);
+
+            return (
+                <button
+                    onClick={handleClick}
+                    className={`self-center mt-6 px-6 py-3 text-xs font-bold rounded-full transition-all cursor-pointer shadow-sm active:scale-95 z-10 ${isConfirming ? 'bg-red-500 text-white animate-pulse' : 'text-white/80 hover:text-white bg-black/20 hover:bg-black/30'}`}
+                >
+                    {isConfirming ? confirmText : text}
+                </button>
+            );
+        };
+
         // --- メインアプリ ---
         const App = () => {
             useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
@@ -574,6 +658,18 @@
             });
             const t = TRANSLATIONS[lang]; // 現在の言語リソース
 
+            // 背景アニメーション設定
+            const [bgAnim, setBgAnim] = useState(true);
+
+            // 背景クラスの切り替え
+            useEffect(() => {
+                if (bgAnim) {
+                    document.body.classList.add('animated-bg');
+                } else {
+                    document.body.classList.remove('animated-bg');
+                }
+            }, [bgAnim]);
+
             const [myId, setMyId] = useState(null);
             const [myName, setMyName] = useState("");
             const [inputRoomId, setInputRoomId] = useState("");
@@ -584,7 +680,7 @@
             const [showTopicList, setShowTopicList] = useState(false);
 
             const [gameState, setGameState] = useState({
-                phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all' },
+                phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all', topicCount: 4 },
                 currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {}
             });
 
@@ -780,8 +876,11 @@
                     });
                 }
 
-                const topics = shuffleArray(availableTopics).slice(0, 4);
-                const targetIndex = Math.floor(Math.random() * 4);
+                // 設定された数だけお題を抽出
+                const topicCount = baseState.settings.topicCount || 4;
+                const topics = shuffleArray(availableTopics).slice(0, topicCount);
+                // 正解のインデックスも設定された数に合わせてランダム生成
+                const targetIndex = Math.floor(Math.random() * topicCount);
 
                 const newState = {
                     ...baseState, phase: 'RANKING', currentRound: nextRound, currentHostId: nextHostId,
@@ -824,6 +923,18 @@
                 }
             };
 
+            const performReset = () => {
+                if (peerRef.current) { peerRef.current.destroy(); peerRef.current = null; }
+                setMyId(null); setInputRoomId(""); setIsHost(false); setIsConnecting(false);
+                setGameState({ phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all', topicCount: 4 }, currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {} });
+                setStatus("SETUP");
+            };
+
+            const returnToLobby = () => {
+                const newState = { ...gameState, phase: 'LOBBY', currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {}, players: gameState.players.map(p => ({ ...p, score: 0 })) };
+                setGameState(newState); broadcast(newState);
+            };
+
             const resetGame = () => {
                 if (isHost) {
                     broadcastEvent('RESET_GAME');
@@ -835,18 +946,6 @@
                     }
                     setTimeout(() => performReset(), 100);
                 }
-            };
-
-            const performReset = () => {
-                if (peerRef.current) { peerRef.current.destroy(); peerRef.current = null; }
-                setMyId(null); setInputRoomId(""); setIsHost(false); setIsConnecting(false);
-                setGameState({ phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all' }, currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {} });
-                setStatus("SETUP");
-            };
-
-            const returnToLobby = () => {
-                const newState = { ...gameState, phase: 'LOBBY', currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {}, players: gameState.players.map(p => ({ ...p, score: 0 })) };
-                setGameState(newState); broadcast(newState);
             };
 
             const createRoom = () => {
@@ -880,9 +979,8 @@
             if (status === 'SETUP') {
                 return (
                     <div className="min-h-screen flex flex-col items-center justify-center p-6 fade-in">
-                        <LangSwitcher lang={lang} setLang={setLang} />
-                        <button onClick={() => setShowTopicList(true)} className="absolute top-6 right-6 p-3 glass rounded-full hover:bg-white transition-all text-white/90 hover:text-emerald-600 shadow-lg group z-40" style={{top: '4.5rem'}}><i data-lucide="book-open" className="w-6 h-6"></i><span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">{t.book}</span></button>
-                        <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl">
+                        <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={null} bgAnim={bgAnim} setBgAnim={setBgAnim} />
+                        <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl mt-16">
                             <div className="text-center mb-6"><h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 mb-2 tracking-tight float">{t.title}</h1><p className="text-gray-500 text-xs font-bold">{t.subtitle}</p></div>
                             {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
                             <div className="space-y-5">
@@ -928,8 +1026,7 @@
             if (gameState.phase === 'LOBBY') {
                 return (
                     <div className="min-h-screen pt-20 px-4 pb-24 slide-up">
-                        <RoomBadge code={roomCode} label={t.room} />
-                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
                             <div className="glass rounded-3xl p-8 mb-8 shadow-xl">
                                 <h2 className="text-3xl font-black text-gray-800 text-center mb-2">{t.lobby}</h2>
@@ -955,6 +1052,12 @@
                                             <select value={gameState.settings.totalRounds} onChange={e => { const newState = { ...gameState, settings: { ...gameState.settings, totalRounds: parseInt(e.target.value) } }; setGameState(newState); broadcast(newState); }} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 font-bold text-indigo-600 outline-none text-sm"><option value="3">3</option><option value="5">5</option><option value="8">8</option><option value="10">10</option></select>
                                         </div>
                                         <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 shadow-inner mb-4">
+                                            <span className="font-bold text-gray-700 text-sm pl-2">{t.topicOptions}</span>
+                                            <select value={gameState.settings.topicCount} onChange={e => { const newState = { ...gameState, settings: { ...gameState.settings, topicCount: parseInt(e.target.value) } }; setGameState(newState); broadcast(newState); }} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 font-bold text-indigo-600 outline-none text-sm">
+                                                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200 shadow-inner mb-4">
                                             <span className="font-bold text-gray-700 text-sm pl-2">{t.category}</span>
                                             <select value={gameState.settings.category} onChange={e => { const newState = { ...gameState, settings: { ...gameState.settings, category: e.target.value } }; setGameState(newState); broadcast(newState); }} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 font-bold text-indigo-600 outline-none text-sm max-w-[60%] truncate"><option value="cat_all">{t.cat_all}</option>{Object.keys(TOPICS_DATA[lang]).map(cat => <option key={cat} value={cat}>{t[cat] || cat}</option>)}</select>
                                         </div>
@@ -968,12 +1071,23 @@
                                             <p className="text-[10px] text-gray-400 pl-2 leading-tight">{gameState.settings.realtimeRanking ? t.modeDescOn : t.modeDescOff}</p>
                                         </div>
                                         <button onClick={startGame} disabled={gameState.players.length < 2} className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all transform active:scale-95 ${gameState.players.length < 2 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:scale-[1.02]'}`}>{t.startGame}</button>
+                                        <button onClick={resetGame} className="w-full mt-4 py-3 rounded-xl text-gray-500 font-bold text-sm bg-gray-200 hover:bg-gray-300 transition">{t.dissolveRoom}</button>
                                     </div>
                                 ) : (
-                                    <div className="text-center bg-white/50 p-6 rounded-2xl border border-white/50 animate-pulse"><p className="font-bold text-gray-600">{t.hostSetting}</p><div className="text-xs text-gray-400 mt-2 flex flex-col gap-1 items-center"><span className="bg-white/50 px-2 py-1 rounded">{t.rounds}: {gameState.settings.totalRounds}</span><span className="bg-white/50 px-2 py-1 rounded">{t.category}: {t[gameState.settings.category]}</span><span className="bg-white/50 px-2 py-1 rounded">{t.mode}: {gameState.settings.realtimeRanking ? t.modeOn : t.modeOff}</span></div></div>
+                                    <div className="text-center bg-white/50 p-6 rounded-2xl border border-white/50 animate-pulse">
+                                        <p className="font-bold text-gray-600">{t.hostSetting}</p>
+                                        <div className="text-xs text-gray-400 mt-2 flex flex-col gap-1 items-center">
+                                            <span className="bg-white/50 px-2 py-1 rounded">{t.rounds}: {gameState.settings.totalRounds}</span>
+                                            <span className="bg-white/50 px-2 py-1 rounded">{t.topicOptions}: {gameState.settings.topicCount}</span>
+                                            <span className="bg-white/50 px-2 py-1 rounded">{t.category}: {t[gameState.settings.category]}</span>
+                                            <span className="bg-white/50 px-2 py-1 rounded">{t.mode}: {gameState.settings.realtimeRanking ? t.modeOn : t.modeOff}</span>
+                                        </div>
+                                        <button onClick={resetGame} className="mt-6 px-4 py-2 rounded-lg bg-gray-200 text-gray-500 text-xs font-bold hover:bg-gray-300 pointer-events-auto">{t.leaveRoom}</button>
+                                    </div>
                                 )}
                             </div>
                         </div>
+                        {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
                     </div>
                 );
             }
@@ -982,8 +1096,7 @@
                 const showRanking = isMyTurn || gameState.settings.realtimeRanking;
                 return (
                     <div className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
-                        <RoomBadge code={roomCode} label={t.room} />
-                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-md mx-auto">
                             <div className="text-center mb-6">
                                 <span className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg">{t.round} {gameState.currentRound} / {gameState.settings.totalRounds}</span>
@@ -993,6 +1106,8 @@
                                 <div className="space-y-3 mb-8">
                                     {gameState.rankedPlayerIds.map((pid, idx) => {
                                         const p = gameState.players.find(pl => pl.id === pid);
+                                        // 安全対策: プレイヤーが見つからない場合は表示しない
+                                        if (!p) return null;
                                         return (
                                             <div key={pid} className="flex items-center glass-dark p-3 rounded-xl border border-white/10 shadow-sm transition-all list-move">
                                                 <div className="w-8 font-black text-white/50 text-center text-xl">{idx+1}</div>
@@ -1010,8 +1125,15 @@
                                 <div className="glass-dark p-8 rounded-3xl border border-white/10 text-center mb-8 pop-in"><div className="flex justify-center mb-4 gap-2"><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce"></div><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce delay-100"></div><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce delay-200"></div></div><p className="font-bold text-white/80">{t.modeOff}</p><p className="text-xs text-white/50 mt-1">{t.modeDescOff}</p></div>
                             )}
                             {isMyTurn && <button onClick={() => submitRanking()} className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black rounded-xl shadow-lg hover:shadow-orange-500/30 transition transform hover:scale-[1.02] active:scale-95">{t.decide}</button>}
+
+                            {/* RANKINGフェーズでも中断ボタンを表示 */}
+                            {isHost && (
+                                <AbortButton onClick={returnToLobby} text={t.abortGame} confirmText={t.confirmAbort} />
+                            )}
+
                             {!isMyTurn && showRanking && <div className="text-center text-white/60 font-bold text-xs animate-pulse"><i data-lucide="loader" className="w-4 h-4 inline-block mr-1 animate-spin"></i>{t.hostThinking}</div>}
                         </div>
+                        {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
                     </div>
                 );
             }
@@ -1019,13 +1141,12 @@
             if (gameState.phase === 'GUESSING') {
                 const hasGuessed = gameState.guesses[myId] !== undefined;
                 return (
-                    <div className="min-h-screen pt-20 px-4 pb-24 slide-up">
-                        <RoomBadge code={roomCode} label={t.room} />
-                        <LangSwitcher lang={lang} setLang={setLang} />
+                    <div className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
+                        <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
                             <div className="glass p-6 rounded-3xl shadow-xl h-fit">
                                 <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2"><h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">{t.rankingBy} {currentHostPlayer?.name}</h3><span className="bg-indigo-100 text-indigo-600 text-[10px] px-2 py-1 rounded font-bold">{t.round} {gameState.currentRound}</span></div>
-                                <div className="space-y-3">{gameState.rankedPlayerIds.map((pid, idx) => { const p = gameState.players.find(pl => pl.id === pid); return (<div key={pid} className="flex items-center pop-in" style={{animationDelay: `${idx * 0.1}s`}}><div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm mr-3 shrink-0 shadow-sm ${idx===0?'bg-yellow-400 text-white':idx===1?'bg-gray-300 text-white':idx===2?'bg-amber-600 text-white':'bg-gray-100 text-gray-400'}`}>{idx+1}</div><div className="bg-white/80 p-2 pr-4 rounded-full flex items-center flex-1 border border-white shadow-sm"><Avatar name={p.name} seed={p.id} size="sm" />
+                                <div className="space-y-3">{gameState.rankedPlayerIds.map((pid, idx) => { const p = gameState.players.find(pl => pl.id === pid); if(!p) return null; return (<div key={pid} className="flex items-center pop-in" style={{animationDelay: `${idx * 0.1}s`}}><div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm mr-3 shrink-0 shadow-sm ${idx===0?'bg-yellow-400 text-white':idx===1?'bg-gray-300 text-white':idx===2?'bg-amber-600 text-white':'bg-gray-100 text-gray-400'}`}>{idx+1}</div><div className="bg-white/80 p-2 pr-4 rounded-full flex items-center flex-1 border border-white shadow-sm"><Avatar name={p.name} seed={p.id} size="sm" />
                                 <div className="ml-3 flex-1 flex items-center min-w-0">
                                     <span className="font-bold text-gray-700 truncate">{p.name}</span>
                                     {p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200 shrink-0">{t.you}</span>}
@@ -1038,7 +1159,7 @@
                                         <div className="flex flex-col items-center justify-center min-h-[300px]">
                                             <div className="mb-8 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl text-center w-full shadow-inner"><p className="text-xs font-bold text-yellow-600 mb-1 uppercase tracking-wider">{t.yourTopic}</p><p className="text-lg font-black text-gray-800">{getTopicText(gameState.topics[gameState.targetTopicIndex], lang)}</p></div>
                                             <p className="text-gray-500 font-bold mb-6 text-sm">{t.waitAnswer}</p>
-                                            <div className="flex flex-wrap justify-center gap-3">{gameState.players.filter(p => p.id !== myId).map(p => (<div key={p.id} className={`transition-all duration-500 relative ${gameState.guesses[p.id] !== undefined ? 'transform scale-110' : 'opacity-30 grayscale'}`}><Avatar name={p.name} seed={p.id} />{gameState.guesses[p.id] !== undefined && <div className="absolute -top-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white animate-bounce"></div>}</div>))}</div>
+                                            <div className="flex flex-wrap justify-center gap-3">{gameState.players.filter(p => p.id !== myId).map(p => { if(!p) return null; return (<div key={p.id} className={`transition-all duration-500 relative ${gameState.guesses[p.id] !== undefined ? 'transform scale-110' : 'opacity-30 grayscale'}`}><Avatar name={p.name} seed={p.id} />{gameState.guesses[p.id] !== undefined && <div className="absolute -top-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white animate-bounce"></div>}</div>)})}</div>
                                         </div>
                                     ) : (
                                         <div className="grid gap-3 relative z-10">
@@ -1049,8 +1170,10 @@
                                         </div>
                                     )}
                                 </div>
+                                {isHost && <AbortButton onClick={returnToLobby} text={t.abortGame} confirmText={t.confirmAbort} />}
                             </div>
                         </div>
+                        {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
                     </div>
                 );
             }
@@ -1063,8 +1186,7 @@
 
                 return (
                     <div className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
-                        <RoomBadge code={roomCode} label={t.room} />
-                        <LangSwitcher lang={lang} setLang={setLang} />
+                        <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
                             <div className="text-center py-6">
                                 <span className="text-white/70 font-bold text-[10px] tracking-widest uppercase mb-2 block fade-in">{isGameOver ? t.finalResult : t.result}</span>
@@ -1076,6 +1198,7 @@
                                         const isRoundHost = p.id === gameState.currentHostId;
                                         const guessIdx = gameState.guesses[p.id];
                                         const isCorrect = guessIdx === gameState.targetTopicIndex;
+                                        if(!p) return null; // 安全対策
                                         return (
                                             <div key={p.id} className="bg-black/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-white/5 relative overflow-hidden transition-all hover:bg-black/30" style={{animation: `slideUp 0.5s ease-out ${idx * 0.1}s forwards`, opacity: 0, transform: 'translateY(20px)'}}>
                                                 <div className="flex items-center mb-3 sm:mb-0 z-10 w-full sm:w-auto"><span className={`w-6 font-black text-center mr-2 ${idx===0 ? 'text-yellow-400 text-2xl drop-shadow' : 'text-indigo-200'}`}>{idx + 1}</span><Avatar name={p.name} seed={p.id} /><div className="ml-3 flex-1"><div className="font-bold text-white flex items-center text-lg">{p.name}{isRoundHost && !isGameOver && <span className="ml-2 text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-full font-black">{t.host}</span>}{idx === 0 && isGameOver && <span className="ml-2 text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded-full font-black animate-pulse">{t.winner}</span>}{p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200">{t.you}</span>}</div>{!isRoundHost && !isGameOver && (<div className="text-xs text-white/60 mt-1 max-w-[200px] truncate"><span className="opacity-70">Guess:</span> <span className={isCorrect ? "text-green-300 font-bold" : "text-red-300"}>{getTopicText(gameState.topics[guessIdx], lang) || "---"}</span></div>)}</div></div>
@@ -1094,6 +1217,7 @@
                             )}
                             {!isHost && !isGameOver && <div className="text-center text-white/60 font-bold text-xs animate-pulse">{t.hostThinking}</div>}
                         </div>
+                        {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
                     </div>
                 );
             }
