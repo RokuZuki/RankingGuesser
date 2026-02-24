@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+    
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5871148617904389" crossorigin="anonymous"></script>
-
+    
     <title>Ranking Guesser Party</title>
-
+    
     <!-- OGP設定 -->
     <meta property="og:title" content="Ranking Guesser Party" />
     <meta property="og:description" content="Party game to guess the ranking! / 価値観共有パーティーゲーム！" />
@@ -26,10 +26,10 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-
+    
     <style>
-        body {
-            font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif;
+        body { 
+            font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif; 
             min-height: 100vh;
             color: #333;
             -webkit-user-select: none;
@@ -38,127 +38,35 @@
             transition: background 0.5s ease;
         }
 
-            body.animated-bg {
-                background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-                background-size: 400% 400%;
-                animation: gradientBG 15s ease infinite;
-            }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+        body.animated-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-
-        .pop-in {
-            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .slide-up {
-            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .list-move {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes popIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .float {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
-        }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        }
-
-        .glass-dark {
-            background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #10B981;
-        }
-
-            .toggle-checkbox:checked + .toggle-label {
-                background-color: #10B981;
-            }
-
-        .uppercase-style {
-            text-transform: uppercase;
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .pop-in { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .list-move { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .float { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+        
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); }
+        .glass-dark { background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .toggle-checkbox:checked { right: 0; border-color: #10B981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10B981; }
+        
+        .uppercase-style { text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -341,7 +249,7 @@
         const TOPICS_DATA = {
             ja: {
                 "cat_survival": [
-                    "無人島で最後まで生き残りそうな人", "ゾンビ映画で最初に犠牲になりそうな人", "デスゲームで最後まで生き残りそうな人",
+                    "無人島で最後まで生き残りそうな人", "ゾンビ映画で最初に犠牲になりそうな人", "デスゲームで最後まで生き残りそうな人", 
                     "デスゲームで一番最初に裏切りそうな人", "明日世界が終わるとしたら一番取り乱しそうな人", "転生したらスライムになりそうな人",
                     "異世界に行っても即座に適応しそうな人", "透明人間になったら一番悪さをしそうな人", "余命1週間と言われたら一番派手に使いそうな人",
                     "記憶喪失になっても性格が変わらなそうな人", "宇宙人と遭遇しても仲良くなれそうな人", "タイムスリップしても歴史を変えてしまいそうな人",
@@ -358,7 +266,7 @@
                 ],
                 "cat_daily": [
                     "スマホの画面が一番割れていそうな人", "一番早起きが得意そうな人", "部屋が一番汚そうな人", "LINEの返信が一番遅そうな人",
-                    "一番美味しいご飯を作りそうな人", "一番長生きしそうな人", "宝くじが当たったら一番豪遊しそうな人",
+                    "一番美味しいご飯を作りそうな人", "一番長生きしそうな人", "宝くじが当たったら一番豪遊しそうな人", 
                     "宝くじが当たっても誰にも言わなそうな人", "一番貯金していそうな人", "一番浪費家そうな人", "一番お酒が強そうな人",
                     "一番友達が多そうな人", "一番SNSに依存していそうな人", "一番ファッションセンスが良さそうな人",
                     "財布の中身がレシートでパンパンそうな人", "休日は一歩も家から出なさそうな人", "一番お風呂が長そうな人",
@@ -458,14 +366,14 @@
                 ]
             }
         };
-
+        
         const COLORS = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'];
 
         // --- ユーティリティ ---
         const generateId = () => Math.random().toString(36).substr(2, 5).toUpperCase();
         const getRandomColor = (id) => COLORS[id.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % COLORS.length];
         const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
-
+        
         const triggerConfetti = () => {
             const count = 200;
             const defaults = { origin: { y: 0.7 } };
@@ -525,8 +433,8 @@
             };
 
             return (
-                <button
-                    onClick={handleCopy}
+                <button 
+                    onClick={handleCopy} 
                     className={`px-2 py-1 sm:px-4 sm:py-2 rounded-full border flex items-center gap-1 sm:gap-2 transition-all active:scale-95 shadow-lg group
                     ${copied ? 'bg-emerald-500 border-emerald-600 text-white scale-105' : 'glass border-white/50 hover:bg-white hover:scale-105'} ${className}`}
                 >
@@ -555,7 +463,7 @@
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                    <button
+                    <button 
                         onClick={() => setBgAnim(!bgAnim)}
                         className={`p-1.5 sm:p-2 glass rounded-full transition-all active:scale-95 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 shadow-sm ${bgAnim ? 'text-indigo-600 hover:bg-white' : 'text-gray-400 bg-gray-100 hover:bg-gray-200'}`}
                         title="Toggle Background"
@@ -566,7 +474,7 @@
                     <button onClick={onOpenBook} className="p-1.5 sm:p-2 glass rounded-full text-emerald-600 hover:bg-white transition-all active:scale-95 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 shadow-sm" title={t.book}>
                         <i data-lucide="book-open" className="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </button>
-                    <button
+                    <button 
                         onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
                         className="glass px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black text-emerald-700 hover:bg-white transition-all active:scale-95 flex items-center gap-1 h-8 sm:h-10 shadow-sm"
                     >
@@ -579,13 +487,14 @@
 
         const TopicListModal = ({ onClose, lang, t }) => {
             const [activeCategory, setActiveCategory] = useState("cat_all");
+            // データからキーを取得
             const cats = Object.keys(TOPICS_DATA[lang]);
             const categories = ["cat_all", ...cats];
 
             const getTopics = () => {
                 if (activeCategory === "cat_all") {
-                    let all = [];
-                    Object.values(TOPICS_DATA[lang]).forEach(arr => all.push(...arr));
+                    let all = []; 
+                    Object.values(TOPICS_DATA[lang]).forEach(arr => all.push(...arr)); 
                     return all;
                 }
                 return TOPICS_DATA[lang][activeCategory] || [];
@@ -610,7 +519,7 @@
                 </div>
             );
         };
-
+        
         // 安全な2段階認証ボタン
         const AbortButton = ({ onClick, text, confirmText }) => {
             const [isConfirming, setIsConfirming] = useState(false);
@@ -627,14 +536,14 @@
                     timeoutRef.current = setTimeout(() => setIsConfirming(false), 3000);
                 }
             };
-
+            
             // Clean up
             useEffect(() => {
                 return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
             }, []);
 
             return (
-                <button
+                <button 
                     onClick={handleClick}
                     className={`block mx-auto mt-6 px-6 py-3 text-xs font-bold rounded-full transition-all cursor-pointer shadow-sm active:scale-95 z-10 ${isConfirming ? 'bg-red-500 text-white animate-pulse' : 'text-white/80 hover:text-white bg-black/20 hover:bg-black/30'}`}
                 >
@@ -652,8 +561,8 @@
                 const browserLang = navigator.language || navigator.userLanguage;
                 return browserLang.startsWith('ja') ? 'ja' : 'en';
             });
-            const t = TRANSLATIONS[lang];
-
+            const t = TRANSLATIONS[lang]; 
+            
             // 言語の最新状態をRefに保持 (PeerJSエラー表示用)
             const langRef = useRef(lang);
             useEffect(() => { langRef.current = lang; }, [lang]);
@@ -683,6 +592,19 @@
                 phase: 'LOBBY', players: [], settings: { totalRounds: 5, realtimeRanking: true, category: 'cat_all', topicCount: 4 },
                 currentRound: 0, currentHostId: null, turnOrder: [], topics: [], targetTopicIndex: -1, rankedPlayerIds: [], guesses: {}
             });
+
+            // AdSenseの除外設定をしやすくするためのURLハッシュ変更処理
+            useEffect(() => {
+                let hash = 'setup';
+                if (status === 'GAME') {
+                    hash = gameState.phase.toLowerCase();
+                } else if (status === 'LOBBY') {
+                    hash = 'lobby';
+                }
+                // 通信を切らさずにURLの見た目だけを変更する
+                window.history.replaceState(null, null, `#${hash}`);
+            }, [status, gameState.phase]);
+
 
             // 演出管理Effect
             useEffect(() => {
@@ -716,12 +638,12 @@
             const connsRef = useRef([]); // Host用
             const hostConnRef = useRef(null); // Client用
             const stateRef = useRef(gameState);
-
+            
             useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
             // Helper to get text based on current language
             const getTopicText = (topicObj, language) => {
-                if (!topicObj || typeof topicObj !== 'object') return "";
+                if (!topicObj || typeof topicObj !== 'object') return ""; 
                 try {
                     return TOPICS_DATA[language][topicObj.cat][topicObj.idx];
                 } catch (e) {
@@ -735,7 +657,7 @@
                     peerRef.current.destroy();
                 }
 
-                const peer = new window.Peer(id, {
+                const peer = new window.Peer(id, { 
                     debug: 1,
                     config: {
                         iceServers: [
@@ -746,23 +668,23 @@
                         ]
                     }
                 });
-                peer.on('open', (pid) => {
-                    setMyId(pid);
+                peer.on('open', (pid) => { 
+                    setMyId(pid); 
                     if (id) setIsConnecting(false);
                 });
-                peer.on('error', (err) => {
-                    console.error("PeerJS Error:", err);
+                peer.on('error', (err) => { 
+                    console.error("PeerJS Error:", err); 
                     const currentLang = langRef.current;
                     const currentT = TRANSLATIONS[currentLang];
                     if (err.type === 'peer-unavailable') {
                         setErrorMsg(currentT.peerUnavailable || "Room not found.");
                     } else {
-                        setErrorMsg(currentT.connError + ": " + err.type);
+                        setErrorMsg(currentT.connError + ": " + err.type); 
                     }
                     setIsConnecting(false);
-                    setTimeout(() => setErrorMsg(""), 5000);
+                    setTimeout(() => setErrorMsg(""), 5000); 
                 });
-                peer.on('connection', (conn) => {
+                peer.on('connection', (conn) => { 
                     conn.on('open', () => { connsRef.current.push(conn); conn.send({ type: 'STATE_UPDATE', payload: stateRef.current }); });
                     conn.on('data', (data) => handleHostData(data, conn));
                     conn.on('close', () => { connsRef.current = connsRef.current.filter(c => c !== conn); });
@@ -772,26 +694,26 @@
 
             const connectToHost = (hostId) => {
                 if (!peerRef.current) return;
-
+                
                 const conn = peerRef.current.connect(hostId, { reliable: true });
-
+                
                 const timeout = setTimeout(() => {
                     if (status === 'SETUP' && hostConnRef.current !== conn) {
                         setErrorMsg(TRANSLATIONS[langRef.current].connTimeout || "Connection timed out.");
                         setIsConnecting(false);
                         peerRef.current.destroy();
-                        setMyId(null);
+                        setMyId(null); 
                     }
-                }, 10000);
+                }, 10000); 
 
-                conn.on('open', () => {
+                conn.on('open', () => { 
                     clearTimeout(timeout);
-                    hostConnRef.current = conn;
-                    conn.send({ type: 'JOIN', payload: { name: myName, id: peerRef.current.id } });
+                    hostConnRef.current = conn; 
+                    conn.send({ type: 'JOIN', payload: { name: myName, id: peerRef.current.id } }); 
                 });
-                conn.on('data', (data) => {
-                    if (data.type === 'STATE_UPDATE') {
-                        setGameState(data.payload);
+                conn.on('data', (data) => { 
+                    if (data.type === 'STATE_UPDATE') { 
+                        setGameState(data.payload); 
                         if (status === 'SETUP') {
                             setStatus(data.payload.phase === 'LOBBY' ? 'LOBBY' : 'GAME');
                             setIsConnecting(false);
@@ -813,20 +735,20 @@
             };
 
             const broadcast = (newState) => { connsRef.current.forEach(c => { if (c.open) c.send({ type: 'STATE_UPDATE', payload: newState }); }); };
-
-            const broadcastEvent = (type, payload = null) => {
-                connsRef.current.forEach(c => { if (c.open) c.send({ type, payload }); });
+            
+            const broadcastEvent = (type, payload = null) => { 
+                connsRef.current.forEach(c => { if (c.open) c.send({ type, payload }); }); 
             };
 
             const handleHostData = (data, conn) => {
                 const current = stateRef.current;
-
+                
                 if (data.type === 'JOIN') {
                     if (current.players.find(p => p.id === data.payload.id)) return;
                     const newPlayer = { ...data.payload, score: 0 };
                     const newState = { ...current, players: [...current.players, newPlayer] };
                     setGameState(newState); broadcast(newState);
-
+                
                 } else if (data.type === 'LEAVE') {
                     const newPlayers = current.players.filter(p => p.id !== data.payload.id);
                     const newState = { ...current, players: newPlayers };
@@ -839,7 +761,7 @@
                     const guessers = current.players.filter(p => p.id !== current.currentHostId);
                     if (Object.keys(newGuesses).length >= guessers.length) calculateScores(newState);
                     else { setGameState(newState); broadcast(newState); }
-
+                
                 } else if (data.type === 'UPDATE_RANKING') {
                     const { rankedIds } = data.payload;
                     const newState = { ...current, rankedPlayerIds: rankedIds };
@@ -884,21 +806,23 @@
                     setGameState(endState); broadcast(endState); return;
                 }
                 const nextHostId = baseState.turnOrder[(nextRound - 1) % baseState.turnOrder.length];
-
+                
+                // お題ID抽出
                 let availableTopics = [];
-                if (baseState.settings.category === 'cat_all') {
+                if (baseState.settings.category === 'cat_all') { 
                     Object.keys(TOPICS_DATA.ja).forEach(cat => {
                         TOPICS_DATA.ja[cat].forEach((_, idx) => {
                             availableTopics.push({ cat, idx });
                         });
-                    });
-                } else {
+                    }); 
+                } else { 
                     const cat = baseState.settings.category;
                     TOPICS_DATA.ja[cat].forEach((_, idx) => {
                         availableTopics.push({ cat, idx });
                     });
                 }
-
+                
+                // フォールバック
                 if (availableTopics.length < 4) {
                     availableTopics = [];
                     Object.keys(TOPICS_DATA.ja).forEach(cat => {
@@ -908,10 +832,12 @@
                     });
                 }
 
+                // 設定された数だけお題を抽出
                 const topicCount = baseState.settings.topicCount || 4;
                 const topics = shuffleArray(availableTopics).slice(0, topicCount);
+                // 正解のインデックスも設定された数に合わせてランダム生成
                 const targetIndex = Math.floor(Math.random() * topicCount);
-
+                
                 const newState = {
                     ...baseState, phase: 'RANKING', currentRound: nextRound, currentHostId: nextHostId,
                     topics, targetTopicIndex: targetIndex, rankedPlayerIds: shuffleArray(baseState.players.map(p => p.id)), guesses: {}
@@ -923,9 +849,9 @@
                 const newOrder = [...gameState.rankedPlayerIds];
                 if (dir === -1 && idx > 0) [newOrder[idx], newOrder[idx-1]] = [newOrder[idx-1], newOrder[idx]];
                 if (dir === 1 && idx < newOrder.length - 1) [newOrder[idx], newOrder[idx+1]] = [newOrder[idx+1], newOrder[idx]];
-
+                
                 setGameState(prev => ({ ...prev, rankedPlayerIds: newOrder }));
-
+                
                 if (isHost) broadcast({ ...stateRef.current, rankedPlayerIds: newOrder });
                 else { const conn = hostConnRef.current; if (conn) conn.send({ type: 'UPDATE_RANKING', payload: { rankedIds: newOrder } }); }
             };
@@ -997,7 +923,7 @@
                 setInputRoomId(finalRoomId);
                 initPeer();
             };
-
+            
             useEffect(() => {
                 if (!isHost && myId && inputRoomId && status === 'SETUP') connectToHost(inputRoomId);
             }, [myId]);
@@ -1009,7 +935,7 @@
             // --- Render ---
             if (status === 'SETUP') {
                 return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 fade-in">
+                    <div id="page-setup" className="min-h-screen flex flex-col items-center justify-center p-6 fade-in">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={null} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl mt-16">
                             <div className="text-center mb-6"><h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 mb-2 tracking-tight float">{t.title}</h1><p className="text-gray-500 text-xs font-bold">{t.subtitle}</p></div>
@@ -1029,7 +955,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div className="max-w-md mx-auto mt-8 glass rounded-xl p-6 text-gray-700 text-left">
                             <h2 className="text-lg font-bold mb-3 text-emerald-600 flex items-center"><i data-lucide="info" className="mr-2 w-5 h-5"></i>{t.aboutTitle}</h2>
                             <p className="mb-4 text-xs leading-relaxed">{t.aboutDesc}</p>
@@ -1056,9 +982,10 @@
 
             if (gameState.phase === 'LOBBY') {
                 return (
-                    <div className="min-h-screen pt-20 px-4 pb-24 slide-up">
+                    <div id="page-lobby" className="min-h-screen pt-20 px-4 pb-24 slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
+                            {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
                             <div className="glass rounded-3xl p-8 mb-8 shadow-xl">
                                 <h2 className="text-3xl font-black text-gray-800 text-center mb-2">{t.lobby}</h2>
                                 <p className="text-center text-gray-500 font-bold mb-8 text-sm">{t.waitingMembers} ({gameState.players.length})</p>
@@ -1129,9 +1056,10 @@
             if (gameState.phase === 'RANKING') {
                 const showRanking = isMyTurn || gameState.settings.realtimeRanking;
                 return (
-                    <div className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
+                    <div id="page-ranking" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-md mx-auto">
+                            {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
                             <div className="text-center mb-6">
                                 <span className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg">{t.round} {gameState.currentRound} / {gameState.settings.totalRounds}</span>
                                 {isMyTurn ? (<><h2 className="text-2xl font-black mt-4 drop-shadow-md">{t.topicTitle}</h2><div className="mt-4 p-6 glass-dark rounded-2xl border border-white/20 shadow-xl pop-in"><p className="text-xl font-black text-yellow-300 drop-shadow-sm leading-relaxed">{getTopicText(gameState.topics[gameState.targetTopicIndex], lang)}</p></div></>) : (<><h2 className="text-2xl font-black mt-4 drop-shadow-md">{t.hostWaitTitle}</h2><div className="mt-4 p-4 glass-dark rounded-2xl border border-white/10 shadow-inner"><p className="text-sm font-bold text-white/70">{t.topicUnknown}</p></div></>)}
@@ -1140,6 +1068,7 @@
                                 <div className="space-y-3 mb-8">
                                     {gameState.rankedPlayerIds.map((pid, idx) => {
                                         const p = gameState.players.find(pl => pl.id === pid);
+                                        // 安全対策: プレイヤーが見つからない場合は表示しない
                                         if (!p) return null;
                                         return (
                                             <div key={pid} className="flex items-center glass-dark p-3 rounded-xl border border-white/10 shadow-sm transition-all list-move">
@@ -1158,7 +1087,8 @@
                                 <div className="glass-dark p-8 rounded-3xl border border-white/10 text-center mb-8 pop-in"><div className="flex justify-center mb-4 gap-2"><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce"></div><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce delay-100"></div><div className="w-3 h-3 bg-white/50 rounded-full animate-bounce delay-200"></div></div><p className="font-bold text-white/80">{t.modeOff}</p><p className="text-xs text-white/50 mt-1">{t.modeDescOff}</p></div>
                             )}
                             {isMyTurn && <button onClick={() => submitRanking()} className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black rounded-xl shadow-lg hover:shadow-orange-500/30 transition transform hover:scale-[1.02] active:scale-95">{t.decide}</button>}
-
+                            
+                            {/* RANKINGフェーズでも中断ボタンを表示 */}
                             {isHost && (
                                 <AbortButton onClick={returnToLobby} text={t.abortGame} confirmText={t.confirmAbort} />
                             )}
@@ -1173,9 +1103,10 @@
             if (gameState.phase === 'GUESSING') {
                 const hasGuessed = gameState.guesses[myId] !== undefined;
                 return (
-                    <div className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
+                    <div id="page-guessing" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+                            {errorMsg && <div className="md:col-span-2 bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
                             <div className="glass p-6 rounded-3xl shadow-xl h-fit">
                                 <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2"><h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">{t.rankingBy} {currentHostPlayer?.name}</h3><span className="bg-indigo-100 text-indigo-600 text-[10px] px-2 py-1 rounded font-bold">{t.round} {gameState.currentRound}</span></div>
                                 <div className="space-y-3">{gameState.rankedPlayerIds.map((pid, idx) => { const p = gameState.players.find(pl => pl.id === pid); if(!p) return null; return (<div key={pid} className="flex items-center pop-in" style={{animationDelay: `${idx * 0.1}s`}}><div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm mr-3 shrink-0 shadow-sm ${idx===0?'bg-yellow-400 text-white':idx===1?'bg-gray-300 text-white':idx===2?'bg-amber-600 text-white':'bg-gray-100 text-gray-400'}`}>{idx+1}</div><div className="bg-white/80 p-2 pr-4 rounded-full flex items-center flex-1 border border-white shadow-sm"><Avatar name={p.name} seed={p.id} size="sm" />
@@ -1213,13 +1144,14 @@
             if (gameState.phase === 'RESULT' || gameState.phase === 'GAMEOVER') {
                 const targetTopic = gameState.topics[gameState.targetTopicIndex];
                 const isGameOver = gameState.phase === 'GAMEOVER';
-
+                
                 const roundCorrectCount = gameState.players.filter(p => p.id !== gameState.currentHostId && gameState.guesses[p.id] === gameState.targetTopicIndex).length;
 
                 return (
-                    <div className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
+                    <div id={isGameOver ? "page-gameover" : "page-result"} className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
+                            {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
                             <div className="text-center py-6">
                                 <span className="text-white/70 font-bold text-[10px] tracking-widest uppercase mb-2 block fade-in">{isGameOver ? t.finalResult : t.result}</span>
                                 {isGameOver ? <h2 className="text-5xl font-black text-yellow-300 mb-2 drop-shadow-lg pop-in">{t.gameOver}</h2> : <div className="pop-in"><div className="inline-block bg-white/20 px-4 py-1 rounded-full text-white text-[10px] font-bold mb-4 backdrop-blur-sm">{t.correctTopic}</div><h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-orange-300 drop-shadow-sm leading-tight p-2">{getTopicText(targetTopic, lang)}</h2></div>}
