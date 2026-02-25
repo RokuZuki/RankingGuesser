@@ -129,7 +129,7 @@
                 nextRound: "次のラウンドへ",
                 returnLobby: "ロビーへ戻る(再戦)",
                 abortGame: "ゲームを中断してロビーへ戻る",
-                confirmAbort: "本当に戻りますか？(Click to confirm)",
+                confirmAbort: "本当にゲームを中断してロビーに戻りますか？",
                 returnTitle: "タイトルに戻る",
                 hostLeft: "ホストが退出しました。タイトルに戻ります。",
                 connError: "通信エラー",
@@ -158,7 +158,12 @@
                 cat_work: "仕事・才能",
                 cat_fantasy: "ファンタジー・中二病",
                 cat_school: "学校・青春",
-                cat_misc: "ネタ・その他"
+                cat_misc: "ネタ・その他",
+                kick: "キック",
+                kickConfirm: "を退出させますか？",
+                kicked: "ホストから退出させられました。",
+                cancel: "キャンセル",
+                confirmOk: "はい"
             },
             en: {
                 title: "Ranking Guesser",
@@ -212,7 +217,7 @@
                 nextRound: "Next Round",
                 returnLobby: "Back to Lobby",
                 abortGame: "Abort & Return to Lobby",
-                confirmAbort: "Are you sure? (Click to confirm)",
+                confirmAbort: "Abort game and return to lobby?",
                 returnTitle: "Back to Title",
                 hostLeft: "Host disconnected. Returning to title.",
                 connError: "Connection Error",
@@ -241,7 +246,12 @@
                 cat_work: "Work / Talent",
                 cat_fantasy: "Fantasy",
                 cat_school: "School",
-                cat_misc: "Misc / Jokes"
+                cat_misc: "Misc / Jokes",
+                kick: "Kick",
+                kickConfirm: "will be kicked. Are you sure?",
+                kicked: "You have been kicked by the host.",
+                cancel: "Cancel",
+                confirmOk: "Yes"
             }
         };
 
@@ -520,35 +530,27 @@
             );
         };
         
-        // 安全な2段階認証ボタン
-        const AbortButton = ({ onClick, text, confirmText }) => {
-            const [isConfirming, setIsConfirming] = useState(false);
-            const timeoutRef = useRef(null);
-
-            const handleClick = () => {
-                if (isConfirming) {
-                    onClick();
-                    setIsConfirming(false);
-                    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                } else {
-                    setIsConfirming(true);
-                    // 3秒後にリセット
-                    timeoutRef.current = setTimeout(() => setIsConfirming(false), 3000);
-                }
-            };
-            
-            // Clean up
-            useEffect(() => {
-                return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
-            }, []);
-
+        // カスタムの確認モーダルコンポーネント
+        const ConfirmModal = ({ isOpen, message, onConfirm, onCancel, t }) => {
+            useEffect(() => { if (isOpen && window.lucide) window.lucide.createIcons(); }, [isOpen]);
+            if (!isOpen) return null;
             return (
-                <button 
-                    onClick={handleClick}
-                    className={`block mx-auto mt-6 px-6 py-3 text-xs font-bold rounded-full transition-all cursor-pointer shadow-sm active:scale-95 z-10 ${isConfirming ? 'bg-red-500 text-white animate-pulse' : 'text-white/80 hover:text-white bg-black/20 hover:bg-black/30'}`}
-                >
-                    {isConfirming ? confirmText : text}
-                </button>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in" onClick={onCancel}>
+                    <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl flex flex-col overflow-hidden pop-in p-6 text-center" onClick={e => e.stopPropagation()}>
+                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border-4 border-red-100">
+                            <i data-lucide="alert-triangle" className="w-8 h-8"></i>
+                        </div>
+                        <h3 className="font-black text-gray-800 text-lg mb-6 leading-relaxed">{message}</h3>
+                        <div className="flex gap-3 justify-center">
+                            <button onClick={onCancel} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-colors">
+                                {t.cancel || "Cancel"}
+                            </button>
+                            <button onClick={() => { onConfirm(); onCancel(); }} className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl shadow-md transition-colors">
+                                {t.confirmOk || "OK"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             );
         };
 
@@ -566,6 +568,15 @@
             // 言語の最新状態をRefに保持 (PeerJSエラー表示用)
             const langRef = useRef(lang);
             useEffect(() => { langRef.current = lang; }, [lang]);
+
+            // カスタム確認ダイアログのState
+            const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, message: '', onConfirm: null });
+            const requestConfirm = (message, onConfirmCallback) => {
+                setConfirmDialog({ isOpen: true, message, onConfirm: onConfirmCallback });
+            };
+            const closeConfirm = () => {
+                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+            };
 
             // 背景アニメーション設定
             const [bgAnim, setBgAnim] = useState(true);
@@ -596,10 +607,12 @@
             // AdSenseの除外設定をしやすくするためのURLハッシュ変更処理
             useEffect(() => {
                 let hash = 'setup';
-                if (status === 'GAME') {
-                    hash = gameState.phase.toLowerCase();
-                } else if (status === 'LOBBY') {
-                    hash = 'lobby';
+                if (status !== 'SETUP') {
+                    if (gameState.phase === 'LOBBY') {
+                        hash = 'lobby';
+                    } else {
+                        hash = 'battle'; // 対戦が始まったら(LOBBY以外なら)常に #battle にする
+                    }
                 }
                 // 通信を切らさずにURLの見た目だけを変更する
                 window.history.replaceState(null, null, `#${hash}`);
@@ -720,6 +733,10 @@
                         }
                     } else if (data.type === 'RESET_GAME') {
                         performReset(false);
+                    } else if (data.type === 'KICKED') {
+                        performReset(false);
+                        setErrorMsg(TRANSLATIONS[langRef.current].kicked);
+                        setTimeout(() => setErrorMsg(""), 5000);
                     }
                 });
                 conn.on('close', () => {
@@ -738,6 +755,27 @@
             
             const broadcastEvent = (type, payload = null) => { 
                 connsRef.current.forEach(c => { if (c.open) c.send({ type, payload }); }); 
+            };
+
+            const kickPlayer = (targetId) => {
+                if (!isHost) return;
+                
+                // 対象プレイヤーのコネクションを探す
+                const targetConn = connsRef.current.find(c => c.peer === targetId);
+                if (targetConn && targetConn.open) {
+                    targetConn.send({ type: 'KICKED' });
+                    // 少し待ってから切断
+                    setTimeout(() => targetConn.close(), 500);
+                }
+                
+                // コネクションリストから削除
+                connsRef.current = connsRef.current.filter(c => c.peer !== targetId);
+                
+                // ゲームステートから削除してブロードキャスト
+                const newPlayers = stateRef.current.players.filter(p => p.id !== targetId);
+                const newState = { ...stateRef.current, players: newPlayers };
+                setGameState(newState);
+                broadcast(newState);
             };
 
             const handleHostData = (data, conn) => {
@@ -976,6 +1014,7 @@
                         </div>
                         <footer className="text-center mt-8 text-xs text-white/70 font-bold">{t.footer}</footer>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
+                        <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
                     </div>
                 );
             }
@@ -993,13 +1032,24 @@
                                     {gameState.players.map((p, idx) => {
                                         if(!p) return null;
                                         return (
-                                            <div key={p.id} className="bg-white/80 p-4 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center pop-in relative" style={{animationDelay: `${idx * 0.1}s`}}>
+                                            <div key={p.id} className="bg-white/80 p-4 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center pop-in relative group" style={{animationDelay: `${idx * 0.1}s`}}>
                                                 <div className="float" style={{animationDelay: `${idx * 0.5}s`}}><Avatar name={p.name} seed={p.id} size="lg" /></div>
                                                 <span className="mt-3 font-bold text-gray-700 truncate w-full text-center flex items-center justify-center">
                                                     {p.name}
                                                     {p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1 border border-emerald-200 shrink-0">{t.you}</span>}
                                                 </span>
-                                                {p.id === gameState.players[0].id && <span className="absolute top-2 right-2 text-[10px] bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full font-bold">{t.host}</span>}
+                                                {p.id === gameState.players[0].id && <span className="absolute top-2 left-2 text-[10px] bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full font-bold">{t.host}</span>}
+                                                
+                                                {/* ホスト専用のキックボタン */}
+                                                {isHost && p.id !== myId && (
+                                                    <button 
+                                                        onClick={() => requestConfirm(`${p.name} ${t.kickConfirm}`, () => kickPlayer(p.id))}
+                                                        className="absolute top-2 right-2 p-1.5 bg-red-100 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-colors shadow-sm"
+                                                        title={t.kick}
+                                                    >
+                                                        <i data-lucide="x" className="w-3 h-3"></i>
+                                                    </button>
+                                                )}
                                             </div>
                                         )
                                     })}
@@ -1049,6 +1099,7 @@
                             </div>
                         </div>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
+                        <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
                     </div>
                 );
             }
@@ -1056,7 +1107,7 @@
             if (gameState.phase === 'RANKING') {
                 const showRanking = isMyTurn || gameState.settings.realtimeRanking;
                 return (
-                    <div id="page-ranking" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
+                    <div id="page-battle" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-md mx-auto">
                             {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
@@ -1090,12 +1141,20 @@
                             
                             {/* RANKINGフェーズでも中断ボタンを表示 */}
                             {isHost && (
-                                <AbortButton onClick={returnToLobby} text={t.abortGame} confirmText={t.confirmAbort} />
+                                <div className="flex justify-center mt-6">
+                                    <button 
+                                        onClick={() => requestConfirm(t.confirmAbort, returnToLobby)}
+                                        className="px-6 py-3 text-xs font-bold text-white/80 hover:text-white bg-black/20 hover:bg-black/30 rounded-full transition-all cursor-pointer shadow-sm active:scale-95 z-10"
+                                    >
+                                        {t.abortGame}
+                                    </button>
+                                </div>
                             )}
 
                             {!isMyTurn && showRanking && <div className="text-center text-white/60 font-bold text-xs animate-pulse"><i data-lucide="loader" className="w-4 h-4 inline-block mr-1 animate-spin"></i>{t.hostThinking}</div>}
                         </div>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
+                        <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
                     </div>
                 );
             }
@@ -1103,7 +1162,7 @@
             if (gameState.phase === 'GUESSING') {
                 const hasGuessed = gameState.guesses[myId] !== undefined;
                 return (
-                    <div id="page-guessing" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
+                    <div id="page-battle" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
                             {errorMsg && <div className="md:col-span-2 bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
@@ -1133,10 +1192,20 @@
                                         </div>
                                     )}
                                 </div>
-                                {isHost && <AbortButton onClick={returnToLobby} text={t.abortGame} confirmText={t.confirmAbort} />}
+                                {isHost && (
+                                    <div className="flex justify-center mt-4">
+                                        <button 
+                                            onClick={() => requestConfirm(t.confirmAbort, returnToLobby)}
+                                            className="px-6 py-3 text-xs font-bold text-white/80 hover:text-white bg-black/20 hover:bg-black/30 rounded-full transition-all cursor-pointer shadow-sm active:scale-95 z-10"
+                                        >
+                                            {t.abortGame}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
+                        <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
                     </div>
                 );
             }
@@ -1148,7 +1217,7 @@
                 const roundCorrectCount = gameState.players.filter(p => p.id !== gameState.currentHostId && gameState.guesses[p.id] === gameState.targetTopicIndex).length;
 
                 return (
-                    <div id={isGameOver ? "page-gameover" : "page-result"} className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
+                    <div id="page-battle" className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
                             {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
@@ -1182,6 +1251,7 @@
                             {!isHost && !isGameOver && <div className="text-center text-white/60 font-bold text-xs animate-pulse">{t.hostThinking}</div>}
                         </div>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
+                        <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
                     </div>
                 );
             }
