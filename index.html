@@ -217,7 +217,7 @@
                 nextRound: "Next Round",
                 returnLobby: "Back to Lobby",
                 abortGame: "Abort & Return to Lobby",
-                confirmAbort: "Abort game and return to lobby?",
+                confirmAbort: "Are you sure? (Click to confirm)",
                 returnTitle: "Back to Title",
                 hostLeft: "Host disconnected. Returning to title.",
                 connError: "Connection Error",
@@ -412,6 +412,18 @@
         };
 
         // --- コンポーネント ---
+        // Reactの再描画エラー（NotFoundError）を防ぐための安全なアイコンコンポーネント
+        const Icon = ({ name, className = "" }) => {
+            const ref = useRef(null);
+            useEffect(() => {
+                if (ref.current && window.lucide) {
+                    ref.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`;
+                    window.lucide.createIcons({ root: ref.current });
+                }
+            }, [name, className]);
+            return <span ref={ref} style={{ display: 'contents' }} />;
+        };
+
         const Avatar = ({ name, seed, size = "md", className = "" }) => {
             const sizeClass = { sm: "w-8 h-8 text-xs", md: "w-10 h-10 text-sm", lg: "w-16 h-16 text-xl", xl: "w-24 h-24 text-3xl" }[size];
             const color = getRandomColor(seed || name);
@@ -452,7 +464,7 @@
                     <span className={`font-mono font-black text-sm sm:text-lg tracking-wider sm:tracking-widest ${copied ? 'text-white' : 'text-gray-800'}`}>
                         {copied ? "COPIED!" : code}
                     </span>
-                    {copied ? <i data-lucide="check" className="w-3 h-3 sm:w-4 sm:h-4 text-white"></i> : <i data-lucide="copy" className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-emerald-500"></i>}
+                    {copied ? <Icon name="check" className="w-3 h-3 sm:w-4 sm:h-4 text-white" /> : <Icon name="copy" className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-emerald-500" />}
                 </button>
             );
         };
@@ -461,7 +473,7 @@
             <header className="fixed top-0 left-0 w-full z-50 h-16 px-4 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm flex items-center justify-between">
                 <div className="flex items-center flex-1 min-w-0 mr-2">
                     <span className="font-black text-xl text-white drop-shadow-md tracking-tighter flex items-center gap-1 cursor-default select-none shrink-0">
-                        <i data-lucide="crown" className="w-6 h-6 text-yellow-300 drop-shadow"></i>
+                        <Icon name="crown" className="w-6 h-6 text-yellow-300 drop-shadow" />
                         <span className="hidden sm:inline">Ranking Guesser</span>
                         <span className="sm:hidden">RG</span>
                     </span>
@@ -478,11 +490,11 @@
                         className={`p-1.5 sm:p-2 glass rounded-full transition-all active:scale-95 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 shadow-sm ${bgAnim ? 'text-indigo-600 hover:bg-white' : 'text-gray-400 bg-gray-100 hover:bg-gray-200'}`}
                         title="Toggle Background"
                     >
-                        <i data-lucide="palette" className="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <Icon name="palette" className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
 
                     <button onClick={onOpenBook} className="p-1.5 sm:p-2 glass rounded-full text-emerald-600 hover:bg-white transition-all active:scale-95 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 shadow-sm" title={t.book}>
-                        <i data-lucide="book-open" className="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <Icon name="book-open" className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     <button 
                         onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
@@ -514,8 +526,8 @@
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in" onClick={onClose}>
                     <div className="bg-white rounded-3xl w-full max-w-2xl h-[80vh] shadow-2xl flex flex-col overflow-hidden pop-in" onClick={e => e.stopPropagation()}>
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h3 className="font-bold text-gray-700 flex items-center"><i data-lucide="book-open" className="w-5 h-5 mr-2 text-emerald-500"></i>{t.book} ({getTopics().length})</h3>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><i data-lucide="x" className="w-6 h-6 text-gray-400"></i></button>
+                            <h3 className="font-bold text-gray-700 flex items-center"><Icon name="book-open" className="w-5 h-5 mr-2 text-emerald-500" />{t.book} ({getTopics().length})</h3>
+                            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><Icon name="x" className="w-6 h-6 text-gray-400" /></button>
                         </div>
                         <div className="flex overflow-x-auto p-3 gap-2 border-b border-gray-100 no-scrollbar bg-white">
                             {categories.map(cat => (
@@ -532,13 +544,12 @@
         
         // カスタムの確認モーダルコンポーネント
         const ConfirmModal = ({ isOpen, message, onConfirm, onCancel, t }) => {
-            useEffect(() => { if (isOpen && window.lucide) window.lucide.createIcons(); }, [isOpen]);
             if (!isOpen) return null;
             return (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in" onClick={onCancel}>
                     <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl flex flex-col overflow-hidden pop-in p-6 text-center" onClick={e => e.stopPropagation()}>
                         <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border-4 border-red-100">
-                            <i data-lucide="alert-triangle" className="w-8 h-8"></i>
+                            <Icon name="alert-triangle" className="w-8 h-8" />
                         </div>
                         <h3 className="font-black text-gray-800 text-lg mb-6 leading-relaxed">{message}</h3>
                         <div className="flex gap-3 justify-center">
@@ -556,8 +567,6 @@
 
         // --- メインアプリ ---
         const App = () => {
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
-
             // 言語設定
             const [lang, setLang] = useState(() => {
                 const browserLang = navigator.language || navigator.userLanguage;
@@ -977,7 +986,7 @@
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={null} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl mt-16">
                             <div className="text-center mb-6"><h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 mb-2 tracking-tight float">{t.title}</h1><p className="text-gray-500 text-xs font-bold">{t.subtitle}</p></div>
-                            {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
+                            {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
                             <div className="space-y-5">
                                 <div className="group"><label className="text-xs font-bold text-gray-400 ml-1">{t.nickname}</label><input type="text" value={myName} onChange={e => setMyName(e.target.value)} placeholder={t.nicknamePlaceholder} className="w-full bg-gray-50/50 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-emerald-400 focus:bg-white outline-none font-bold text-gray-700 transition-all" /></div>
                                 <div className="group">
@@ -985,9 +994,9 @@
                                     <input type="text" value={inputRoomId} onChange={e => setInputRoomId(e.target.value)} placeholder={t.roomIdPlaceholder} className="w-full text-center tracking-[0.2em] font-mono text-xl uppercase-style bg-gray-50/50 border-2 border-gray-200 focus:border-indigo-400 focus:bg-white rounded-xl py-3 outline-none font-bold text-gray-700 transition-all" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 pt-2">
-                                    <button onClick={createRoom} disabled={!myName || isConnecting} className={`py-4 rounded-xl font-black shadow-lg transition-all transform flex flex-col items-center justify-center ${(!myName || isConnecting) ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100' : 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white hover:shadow-emerald-300/50 hover:scale-[1.02] active:scale-95'}`}><i data-lucide="plus-square" className="mb-1 w-6 h-6"></i>{t.createRoom}</button>
+                                    <button onClick={createRoom} disabled={!myName || isConnecting} className={`py-4 rounded-xl font-black shadow-lg transition-all transform flex flex-col items-center justify-center ${(!myName || isConnecting) ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100' : 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white hover:shadow-emerald-300/50 hover:scale-[1.02] active:scale-95'}`}><Icon name="plus-square" className="mb-1 w-6 h-6" />{t.createRoom}</button>
                                     <button onClick={joinRoom} disabled={inputRoomId.length < 5 || !myName || isConnecting} className={`py-4 rounded-xl font-black shadow-lg transition-all transform flex flex-col items-center justify-center ${(inputRoomId.length < 5 || !myName || isConnecting) ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100' : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-300/50 hover:scale-[1.02] active:scale-95'}`}>
-                                        {isConnecting ? <i data-lucide="loader" className="mb-1 w-6 h-6 animate-spin"></i> : <i data-lucide="log-in" className="mb-1 w-6 h-6"></i>}
+                                        {isConnecting ? <Icon name="loader" className="mb-1 w-6 h-6 animate-spin" /> : <Icon name="log-in" className="mb-1 w-6 h-6" />}
                                         {isConnecting ? t.connecting : t.joinRoom}
                                     </button>
                                 </div>
@@ -995,7 +1004,7 @@
                         </div>
                         
                         <div className="max-w-md mx-auto mt-8 glass rounded-xl p-6 text-gray-700 text-left">
-                            <h2 className="text-lg font-bold mb-3 text-emerald-600 flex items-center"><i data-lucide="info" className="mr-2 w-5 h-5"></i>{t.aboutTitle}</h2>
+                            <h2 className="text-lg font-bold mb-3 text-emerald-600 flex items-center"><Icon name="info" className="mr-2 w-5 h-5" />{t.aboutTitle}</h2>
                             <p className="mb-4 text-xs leading-relaxed">{t.aboutDesc}</p>
                             <h3 className="font-bold text-gray-800 mt-4 mb-2 text-xs">{t.howToPlay}</h3>
                             <ol className="list-decimal list-inside space-y-2 text-[10px] bg-gray-50/50 p-3 rounded-lg border border-gray-200/50">
@@ -1005,7 +1014,7 @@
                                 <li>{t.step4}</li>
                             </ol>
                             <div className="mt-4 p-3 bg-emerald-50/80 border border-emerald-200/50 rounded-lg flex items-start">
-                                <i data-lucide="video" className="w-4 h-4 text-emerald-500 mr-2 mt-0.5 shrink-0"></i>
+                                <Icon name="video" className="w-4 h-4 text-emerald-500 mr-2 mt-0.5 shrink-0" />
                                 <div>
                                     <h4 className="font-bold text-emerald-700 text-xs mb-1">{t.distributionTitle}</h4>
                                     <p className="text-[10px] text-emerald-600 leading-relaxed">{t.distributionDesc}</p>
@@ -1024,7 +1033,7 @@
                     <div id="page-lobby" className="min-h-screen pt-20 px-4 pb-24 slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
-                            {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
+                            {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce shadow-md"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
                             <div className="glass rounded-3xl p-8 mb-8 shadow-xl">
                                 <h2 className="text-3xl font-black text-gray-800 text-center mb-2">{t.lobby}</h2>
                                 <p className="text-center text-gray-500 font-bold mb-8 text-sm">{t.waitingMembers} ({gameState.players.length})</p>
@@ -1047,7 +1056,7 @@
                                                         className="absolute top-2 right-2 p-1.5 bg-red-100 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-colors shadow-sm"
                                                         title={t.kick}
                                                     >
-                                                        <i data-lucide="x" className="w-3 h-3"></i>
+                                                        <Icon name="x" className="w-3 h-3" />
                                                     </button>
                                                 )}
                                             </div>
@@ -1110,7 +1119,7 @@
                     <div id="page-battle" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-md mx-auto">
-                            {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
+                            {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
                             <div className="text-center mb-6">
                                 <span className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg">{t.round} {gameState.currentRound} / {gameState.settings.totalRounds}</span>
                                 {isMyTurn ? (<><h2 className="text-2xl font-black mt-4 drop-shadow-md">{t.topicTitle}</h2><div className="mt-4 p-6 glass-dark rounded-2xl border border-white/20 shadow-xl pop-in"><p className="text-xl font-black text-yellow-300 drop-shadow-sm leading-relaxed">{getTopicText(gameState.topics[gameState.targetTopicIndex], lang)}</p></div></>) : (<><h2 className="text-2xl font-black mt-4 drop-shadow-md">{t.hostWaitTitle}</h2><div className="mt-4 p-4 glass-dark rounded-2xl border border-white/10 shadow-inner"><p className="text-sm font-bold text-white/70">{t.topicUnknown}</p></div></>)}
@@ -1129,7 +1138,7 @@
                                                     {p.name}
                                                     {p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200 shrink-0">{t.you}</span>}
                                                 </span>
-                                                {isMyTurn && <div className="flex flex-col gap-1 ml-2"><button onClick={()=>movePlayer(idx, -1)} className="p-2 hover:bg-white/20 rounded active:bg-white/30 transition-colors"><i data-lucide="chevron-up" className="w-6 h-6"></i></button><button onClick={()=>movePlayer(idx, 1)} className="p-2 hover:bg-white/20 rounded active:bg-white/30 transition-colors"><i data-lucide="chevron-down" className="w-6 h-6"></i></button></div>}
+                                                {isMyTurn && <div className="flex flex-col gap-1 ml-2"><button onClick={()=>movePlayer(idx, -1)} className="p-2 hover:bg-white/20 rounded active:bg-white/30 transition-colors"><Icon name="chevron-up" className="w-6 h-6" /></button><button onClick={()=>movePlayer(idx, 1)} className="p-2 hover:bg-white/20 rounded active:bg-white/30 transition-colors"><Icon name="chevron-down" className="w-6 h-6" /></button></div>}
                                             </div>
                                         );
                                     })}
@@ -1151,7 +1160,7 @@
                                 </div>
                             )}
 
-                            {!isMyTurn && showRanking && <div className="text-center text-white/60 font-bold text-xs animate-pulse"><i data-lucide="loader" className="w-4 h-4 inline-block mr-1 animate-spin"></i>{t.hostThinking}</div>}
+                            {!isMyTurn && showRanking && <div className="text-center text-white/60 font-bold text-xs animate-pulse"><Icon name="loader" className="w-4 h-4 inline-block mr-1 animate-spin" />{t.hostThinking}</div>}
                         </div>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
                         <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
@@ -1165,7 +1174,7 @@
                     <div id="page-battle" className="min-h-screen pt-20 px-4 pb-24 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
-                            {errorMsg && <div className="md:col-span-2 bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
+                            {errorMsg && <div className="md:col-span-2 bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
                             <div className="glass p-6 rounded-3xl shadow-xl h-fit">
                                 <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2"><h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">{t.rankingBy} {currentHostPlayer?.name}</h3><span className="bg-indigo-100 text-indigo-600 text-[10px] px-2 py-1 rounded font-bold">{t.round} {gameState.currentRound}</span></div>
                                 <div className="space-y-3">{gameState.rankedPlayerIds.map((pid, idx) => { const p = gameState.players.find(pl => pl.id === pid); if(!p) return null; return (<div key={pid} className="flex items-center pop-in" style={{animationDelay: `${idx * 0.1}s`}}><div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm mr-3 shrink-0 shadow-sm ${idx===0?'bg-yellow-400 text-white':idx===1?'bg-gray-300 text-white':idx===2?'bg-amber-600 text-white':'bg-gray-100 text-gray-400'}`}>{idx+1}</div><div className="bg-white/80 p-2 pr-4 rounded-full flex items-center flex-1 border border-white shadow-sm"><Avatar name={p.name} seed={p.id} size="sm" />
@@ -1176,7 +1185,7 @@
                             </div>
                             <div className="flex flex-col">
                                 <div className="glass p-6 rounded-3xl shadow-xl flex-1 relative overflow-hidden">
-                                    <h3 className="text-lg font-black text-gray-800 mb-6 relative z-10 flex items-center"><span className="bg-emerald-100 text-emerald-600 p-2 rounded-lg mr-2"><i data-lucide="help-circle" className="w-5 h-5"></i></span>{t.guessTitle}</h3>
+                                    <h3 className="text-lg font-black text-gray-800 mb-6 relative z-10 flex items-center"><span className="bg-emerald-100 text-emerald-600 p-2 rounded-lg mr-2"><Icon name="help-circle" className="w-5 h-5" /></span>{t.guessTitle}</h3>
                                     {isMyTurn ? (
                                         <div className="flex flex-col items-center justify-center min-h-[300px]">
                                             <div className="mb-8 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl text-center w-full shadow-inner"><p className="text-xs font-bold text-yellow-600 mb-1 uppercase tracking-wider">{t.yourTopic}</p><p className="text-lg font-black text-gray-800">{getTopicText(gameState.topics[gameState.targetTopicIndex], lang)}</p></div>
@@ -1186,7 +1195,7 @@
                                     ) : (
                                         <div className="grid gap-3 relative z-10">
                                             {gameState.topics.map((topic, idx) => (
-                                                <button key={idx} onClick={() => submitGuess(idx)} disabled={hasGuessed} className={`p-4 rounded-xl text-left border-2 font-bold transition-all relative overflow-hidden text-sm group ${hasGuessed && gameState.guesses[myId] === idx ? 'border-emerald-500 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-200' : 'border-gray-200/50 bg-white/50 hover:bg-white hover:border-indigo-300 hover:shadow-md text-gray-600'} ${hasGuessed && gameState.guesses[myId] !== idx ? 'opacity-40' : ''}`}>{getTopicText(topic, lang)}{hasGuessed && gameState.guesses[myId] === idx && <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pop-in"><i data-lucide="check-circle" className="w-6 h-6"></i></div>}</button>
+                                                <button key={idx} onClick={() => submitGuess(idx)} disabled={hasGuessed} className={`p-4 rounded-xl text-left border-2 font-bold transition-all relative overflow-hidden text-sm group ${hasGuessed && gameState.guesses[myId] === idx ? 'border-emerald-500 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-200' : 'border-gray-200/50 bg-white/50 hover:bg-white hover:border-indigo-300 hover:shadow-md text-gray-600'} ${hasGuessed && gameState.guesses[myId] !== idx ? 'opacity-40' : ''}`}>{getTopicText(topic, lang)}{hasGuessed && gameState.guesses[myId] === idx && <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pop-in"><Icon name="check-circle" className="w-6 h-6" /></div>}</button>
                                             ))}
                                             {hasGuessed && <div className="text-center mt-4 text-emerald-600 font-bold text-xs animate-pulse">{t.waitOthers}</div>}
                                         </div>
@@ -1220,7 +1229,7 @@
                     <div id="page-battle" className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
-                            {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><i data-lucide="alert-circle" className="w-4 h-4 mr-2"></i>{errorMsg}</div>}
+                            {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
                             <div className="text-center py-6">
                                 <span className="text-white/70 font-bold text-[10px] tracking-widest uppercase mb-2 block fade-in">{isGameOver ? t.finalResult : t.result}</span>
                                 {isGameOver ? <h2 className="text-5xl font-black text-yellow-300 mb-2 drop-shadow-lg pop-in">{t.gameOver}</h2> : <div className="pop-in"><div className="inline-block bg-white/20 px-4 py-1 rounded-full text-white text-[10px] font-bold mb-4 backdrop-blur-sm">{t.correctTopic}</div><h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-orange-300 drop-shadow-sm leading-tight p-2">{getTopicText(targetTopic, lang)}</h2></div>}
@@ -1235,7 +1244,7 @@
                                         return (
                                             <div key={p.id} className="bg-black/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-white/5 relative overflow-hidden transition-all hover:bg-black/30" style={{animation: `slideUp 0.5s ease-out ${idx * 0.1}s forwards`, opacity: 0, transform: 'translateY(20px)'}}>
                                                 <div className="flex items-center mb-3 sm:mb-0 z-10 w-full sm:w-auto"><span className={`w-6 font-black text-center mr-2 ${idx===0 ? 'text-yellow-400 text-2xl drop-shadow' : 'text-indigo-200'}`}>{idx + 1}</span><Avatar name={p.name} seed={p.id} /><div className="ml-3 flex-1"><div className="font-bold text-white flex items-center text-lg">{p.name}{isRoundHost && !isGameOver && <span className="ml-2 text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-full font-black">{t.host}</span>}{idx === 0 && isGameOver && <span className="ml-2 text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded-full font-black animate-pulse">{t.winner}</span>}{p.id === myId && <span className="bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 border border-emerald-200">{t.you}</span>}</div>{!isRoundHost && !isGameOver && (<div className="text-xs text-white/60 mt-1 max-w-[200px] truncate"><span className="opacity-70">Guess:</span> <span className={isCorrect ? "text-green-300 font-bold" : "text-red-300"}>{getTopicText(gameState.topics[guessIdx], lang) || "---"}</span></div>)}</div></div>
-                                                <div className="flex flex-row sm:flex-col items-center sm:items-end w-full sm:w-auto justify-between sm:justify-center z-10 pl-8 sm:pl-0">{!isGameOver && (<div className="mb-1">{isRoundHost ? (roundCorrectCount > 0 ? <span className="text-pink-300 text-[10px] font-bold">{t.bonus} (+{roundCorrectCount * 50})</span> : <span className="text-gray-400 text-[10px] font-bold">{t.allWrong} (+0)</span>) : isCorrect ? <span className="bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-lg shadow-green-500/50"><i data-lucide="check" className="w-3 h-3 mr-1"></i> {t.nice}</span> : <span className="text-red-300 text-[10px] font-bold opacity-60">{t.miss}</span>}</div>)}<div className="text-2xl font-black text-white tracking-tight flex items-baseline drop-shadow-md">{p.score} <span className="text-sm text-white/50 ml-1">pt</span></div></div>
+                                                <div className="flex flex-row sm:flex-col items-center sm:items-end w-full sm:w-auto justify-between sm:justify-center z-10 pl-8 sm:pl-0">{!isGameOver && (<div className="mb-1">{isRoundHost ? (roundCorrectCount > 0 ? <span className="text-pink-300 text-[10px] font-bold">{t.bonus} (+{roundCorrectCount * 50})</span> : <span className="text-gray-400 text-[10px] font-bold">{t.allWrong} (+0)</span>) : isCorrect ? <span className="bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-lg shadow-green-500/50"><Icon name="check" className="w-3 h-3 mr-1" /> {t.nice}</span> : <span className="text-red-300 text-[10px] font-bold opacity-60">{t.miss}</span>}</div>)}<div className="text-2xl font-black text-white tracking-tight flex items-baseline drop-shadow-md">{p.score} <span className="text-sm text-white/50 ml-1">pt</span></div></div>
                                             </div>
                                         );
                                     })}
@@ -1248,7 +1257,7 @@
                                     <button onClick={resetGame} className="py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black rounded-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all">{t.returnTitle}</button>
                                 </div>
                             )}
-                            {!isHost && !isGameOver && <div className="text-center text-white/60 font-bold text-xs animate-pulse">{t.hostThinking}</div>}
+                            {!isHost && !isGameOver && <div className="text-center text-white/60 font-bold text-xs animate-pulse"><Icon name="loader" className="w-4 h-4 inline-block mr-1 animate-spin" />{t.hostThinking}</div>}
                         </div>
                         {showTopicList && <TopicListModal onClose={() => setShowTopicList(false)} lang={lang} t={t} />}
                         <ConfirmModal isOpen={confirmDialog.isOpen} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={closeConfirm} t={t} />
