@@ -832,8 +832,10 @@ This Site may review and change this policy at any time without notice due to th
                 if (status !== 'SETUP') {
                     if (gameState.phase === 'LOBBY') {
                         hash = 'lobby';
+                    } else if (gameState.phase === 'GAMEOVER') {
+                        hash = 'result'; // 最終結果画面の時のみ #result
                     } else {
-                        hash = 'battle'; // 対戦が始まったら(LOBBY以外なら)常に #battle にする
+                        hash = 'battle'; // 対戦中(RANKING, GUESSING, RESULT)は #battle
                     }
                 }
                 // 通信を切らさずにURLの見た目だけを変更する
@@ -1501,7 +1503,7 @@ This Site may review and change this policy at any time without notice due to th
                 const roundCorrectCount = gameState.players.filter(p => p.id !== gameState.currentHostId && gameState.guesses[p.id] === gameState.targetTopicIndex).length;
 
                 return (
-                    <div id="page-battle" className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
+                    <div id={isGameOver ? "page-result" : "page-battle"} className="min-h-screen pt-20 px-4 pb-20 text-white slide-up">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={roomCode} bgAnim={bgAnim} setBgAnim={setBgAnim} />
                         <div className="max-w-2xl mx-auto">
                             {errorMsg && <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-pulse shadow-md"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
