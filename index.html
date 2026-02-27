@@ -7,7 +7,9 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5871148617904389" crossorigin="anonymous"></script>
     
-    <title>Ranking Guesser Party</title>
+    <title>Ranking Guesser Party - 無料で遊べる価値観共有ブラウザゲーム</title>
+    <meta name="description" content="インストール不要・登録不要！友達や配信のリスナーとブラウザですぐに遊べるランキング当てゲーム（心理戦パーティーゲーム）。出題されるお題に合わせたランキングを見て、お題が何かを当てよう！">
+    <meta name="keywords" content="ブラウザゲーム,無料ゲーム,パーティーゲーム,価値観,心理戦,オンラインゲーム,マルチプレイ,配信向け">
     
     <!-- OGP設定 -->
     <meta property="og:title" content="Ranking Guesser Party" />
@@ -67,10 +69,42 @@
         .toggle-checkbox:checked + .toggle-label { background-color: #10B981; }
         
         .uppercase-style { text-transform: uppercase; }
+
+        /* クローラー用のテキストを画面から隠す（SEOペナルティにならないように表示領域外へ） */
+        .seo-text-container {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <!-- GoogleBot等のクローラー向けにサイトのコンテンツをテキストで記述 (React起動時に上書きされます) -->
+    <div id="root">
+        <div class="seo-text-container">
+            <h1>Ranking Guesser Party (ランキングゲッサーパーティー)</h1>
+            <p>無料で遊べる、インストール不要の価値観共有ブラウザゲームです。オンラインで友達と通話しながら遊ぶパーティーゲームとして最適です。</p>
+            <h2>ゲームの遊び方とルール</h2>
+            <p>1. ホストが部屋を作り、友達にRoomIDを共有します。</p>
+            <p>2. ホストはお題（例：無人島で生き残りそうな人）に沿って参加者をランキング順に並べ替えます。</p>
+            <p>3. 参加者はランキングを見て、4つの選択肢の中から「お題が何だったか」を推理して当てます。</p>
+            <h2>ゲームの特徴</h2>
+            <ul>
+                <li>アプリのインストールやアカウント登録は一切不要。URLをクリックするだけで即プレイ可能。</li>
+                <li>PC、スマートフォン、タブレットなど、どの端末からでもクロスプレイが可能です。</li>
+                <li>YouTuberやVTuberの実況プレイ、ライブ配信でのリスナー参加型企画にも最適です。</li>
+            </ul>
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh; color:white; font-weight:bold;">
+            Loading Game...
+        </div>
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
@@ -164,7 +198,23 @@
                 kicked: "ホストから退出させられました。",
                 cancel: "キャンセル",
                 confirmOk: "はい",
-                contact: "お問い合わせ"
+                contact: "お問い合わせ",
+                
+                // 追加テキスト(SEO/AdSense対策用)
+                featuresTitle: "ゲームの特徴",
+                feature1Title: "インストール不要・すぐ遊べる",
+                feature1Desc: "アプリのダウンロードや面倒な会員登録は一切不要。URLを共有するだけで、スマホでもPCでもブラウザからすぐに遊べます。",
+                feature2Title: "白熱の心理戦",
+                feature2Desc: "「誰がどう並べられたか」を手がかりに、友達の意外な本音や隠された価値観を推理する、新しいタイプのパーティーゲームです。",
+                feature3Title: "豊富なお題カテゴリ",
+                feature3Desc: "「恋愛・結婚」「生活・日常」「サバイバル」など、会話が盛り上がるお題を数百種類収録しています。",
+                faqTitle: "よくある質問 (FAQ)",
+                faq1Q: "何人から遊べますか？",
+                faq1A: "2人から遊べますが、3〜8人程度が最も推理が盛り上がります。上限はありませんが、画面の表示上10人程度までを推奨しています。",
+                faq2Q: "通話アプリは必要ですか？",
+                faq2A: "ゲーム内に通話機能はありません。Discord、LINE通話、Zoomなどを繋ぎながら会話メインで遊ぶことを強くおすすめします。",
+                faq3Q: "スマホとPCで一緒に遊べますか？",
+                faq3A: "はい、可能です。ブラウザが動く端末であれば、機種を問わず一緒にプレイ（クロスプレイ）ができます。"
             },
             en: {
                 title: "Ranking Guesser",
@@ -253,7 +303,23 @@
                 kicked: "You have been kicked by the host.",
                 cancel: "Cancel",
                 confirmOk: "Yes",
-                contact: "Contact Us"
+                contact: "Contact Us",
+                
+                // 追加テキスト(SEO/AdSense対策用)
+                featuresTitle: "Game Features",
+                feature1Title: "No Install Needed",
+                feature1Desc: "No downloads or registration required. Just share the URL and play instantly on any device.",
+                feature2Title: "Psychological Battle",
+                feature2Desc: "Guess the host's secret topic based on how they ranked everyone. Expose your friends' true values!",
+                feature3Title: "Hundreds of Topics",
+                feature3Desc: "Includes a wide variety of topics from 'Romance' to 'Survival' to keep the conversation going.",
+                faqTitle: "Frequently Asked Questions",
+                faq1Q: "How many players are required?",
+                faq1A: "You can play with 2 players, but it's most fun with 3-8 players. There is no hard limit, but around 10 is recommended for screen space.",
+                faq2Q: "Do we need a voice chat?",
+                faq2A: "There is no built-in voice chat. We highly recommend using Discord, Zoom, or other voice apps while playing.",
+                faq3Q: "Can mobile and PC users play together?",
+                faq3A: "Yes! The game works via a web browser, supporting seamless cross-play across all devices."
             }
         };
 
@@ -1129,9 +1195,11 @@ This Site may review and change this policy at any time without notice due to th
             // --- Render ---
             if (status === 'SETUP') {
                 return (
-                    <div id="page-setup" className="min-h-screen flex flex-col items-center justify-center p-6 fade-in">
+                    <div id="page-setup" className="min-h-screen flex flex-col items-center justify-center p-6 fade-in pt-16">
                         <Header lang={lang} setLang={setLang} onOpenBook={() => setShowTopicList(true)} t={t} roomCode={null} bgAnim={bgAnim} setBgAnim={setBgAnim} />
-                        <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl mt-16">
+                        
+                        {/* メインのゲーム参加/作成カード */}
+                        <div className="glass p-8 rounded-3xl w-full max-w-sm border-2 border-white/40 pop-in relative overflow-hidden shadow-2xl mt-8 z-10">
                             <div className="text-center mb-6"><h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 mb-2 tracking-tight float">{t.title}</h1><p className="text-gray-500 text-xs font-bold">{t.subtitle}</p></div>
                             {errorMsg && <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-xs font-bold flex items-center animate-bounce"><Icon name="alert-circle" className="w-4 h-4 mr-2" />{errorMsg}</div>}
                             <div className="space-y-5">
@@ -1150,26 +1218,70 @@ This Site may review and change this policy at any time without notice due to th
                             </div>
                         </div>
                         
-                        <div className="max-w-md mx-auto mt-8 glass rounded-xl p-6 text-gray-700 text-left">
-                            <h2 className="text-lg font-bold mb-3 text-emerald-600 flex items-center"><Icon name="info" className="mr-2 w-5 h-5" />{t.aboutTitle}</h2>
-                            <p className="mb-4 text-xs leading-relaxed">{t.aboutDesc}</p>
-                            <h3 className="font-bold text-gray-800 mt-4 mb-2 text-xs">{t.howToPlay}</h3>
-                            <ol className="list-decimal list-inside space-y-2 text-[10px] bg-gray-50/50 p-3 rounded-lg border border-gray-200/50">
-                                <li>{t.step1}</li>
-                                <li>{t.step2}</li>
-                                <li>{t.step3}</li>
-                                <li>{t.step4}</li>
-                            </ol>
-                            <div className="mt-4 p-3 bg-emerald-50/80 border border-emerald-200/50 rounded-lg flex items-start">
-                                <Icon name="video" className="w-4 h-4 text-emerald-500 mr-2 mt-0.5 shrink-0" />
-                                <div>
-                                    <h4 className="font-bold text-emerald-700 text-xs mb-1">{t.distributionTitle}</h4>
-                                    <p className="text-[10px] text-emerald-600 leading-relaxed">{t.distributionDesc}</p>
+                        {/* SEO / AdSense 対策用の詳細コンテンツエリア（テキスト量を増やす） */}
+                        <div className="max-w-2xl w-full mx-auto mt-12 grid gap-6 md:grid-cols-2">
+                            
+                            {/* ゲームの紹介 */}
+                            <div className="glass rounded-xl p-6 text-gray-700 text-left md:col-span-2">
+                                <h2 className="text-lg font-bold mb-3 text-emerald-600 flex items-center"><Icon name="info" className="mr-2 w-5 h-5" />{t.aboutTitle}</h2>
+                                <p className="mb-4 text-sm leading-relaxed">{t.aboutDesc}</p>
+                                <h3 className="font-bold text-gray-800 mt-4 mb-2 text-sm">{t.howToPlay}</h3>
+                                <ol className="list-decimal list-inside space-y-2 text-xs bg-gray-50/50 p-4 rounded-lg border border-gray-200/50 leading-relaxed">
+                                    <li>{t.step1}</li>
+                                    <li>{t.step2}</li>
+                                    <li>{t.step3}</li>
+                                    <li>{t.step4}</li>
+                                </ol>
+                                <div className="mt-4 p-4 bg-emerald-50/80 border border-emerald-200/50 rounded-lg flex items-start">
+                                    <Icon name="video" className="w-5 h-5 text-emerald-500 mr-3 mt-0.5 shrink-0" />
+                                    <div>
+                                        <h4 className="font-bold text-emerald-700 text-sm mb-1">{t.distributionTitle}</h4>
+                                        <p className="text-xs text-emerald-600 leading-relaxed">{t.distributionDesc}</p>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* ゲームの特徴 (文字数稼ぎ) */}
+                            <div className="glass rounded-xl p-6 text-gray-700 text-left">
+                                <h2 className="text-lg font-bold mb-4 text-indigo-600 flex items-center"><Icon name="sparkles" className="mr-2 w-5 h-5" />{t.featuresTitle}</h2>
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="font-bold text-sm text-gray-800 mb-1">{t.feature1Title}</h3>
+                                        <p className="text-xs text-gray-600 leading-relaxed">{t.feature1Desc}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-sm text-gray-800 mb-1">{t.feature2Title}</h3>
+                                        <p className="text-xs text-gray-600 leading-relaxed">{t.feature2Desc}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-sm text-gray-800 mb-1">{t.feature3Title}</h3>
+                                        <p className="text-xs text-gray-600 leading-relaxed">{t.feature3Desc}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* FAQ (文字数稼ぎ) */}
+                            <div className="glass rounded-xl p-6 text-gray-700 text-left">
+                                <h2 className="text-lg font-bold mb-4 text-pink-600 flex items-center"><Icon name="help-circle" className="mr-2 w-5 h-5" />{t.faqTitle}</h2>
+                                <div className="space-y-4">
+                                    <div className="bg-white/50 p-3 rounded-lg">
+                                        <p className="font-bold text-xs text-gray-800 mb-1 flex"><span className="text-pink-500 mr-2">Q.</span>{t.faq1Q}</p>
+                                        <p className="text-xs text-gray-600 leading-relaxed flex"><span className="text-gray-400 mr-2">A.</span>{t.faq1A}</p>
+                                    </div>
+                                    <div className="bg-white/50 p-3 rounded-lg">
+                                        <p className="font-bold text-xs text-gray-800 mb-1 flex"><span className="text-pink-500 mr-2">Q.</span>{t.faq2Q}</p>
+                                        <p className="text-xs text-gray-600 leading-relaxed flex"><span className="text-gray-400 mr-2">A.</span>{t.faq2A}</p>
+                                    </div>
+                                    <div className="bg-white/50 p-3 rounded-lg">
+                                        <p className="font-bold text-xs text-gray-800 mb-1 flex"><span className="text-pink-500 mr-2">Q.</span>{t.faq3Q}</p>
+                                        <p className="text-xs text-gray-600 leading-relaxed flex"><span className="text-gray-400 mr-2">A.</span>{t.faq3A}</p>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                         
-                        <footer className="text-center mt-12 mb-8 text-xs text-white/70 font-bold space-y-3">
+                        <footer className="text-center mt-12 mb-8 text-xs text-white/70 font-bold space-y-3 w-full">
                             <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-white/80">
                                 <button onClick={() => setShowTerms(true)} className="hover:text-white underline decoration-white/30 underline-offset-4 transition-all">
                                     {legalText.terms.title}
