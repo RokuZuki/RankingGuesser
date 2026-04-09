@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ニュース & ガイド - Ranking Guesser Party</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', 'M PLUS Rounded 1c', sans-serif; background-color: #f0f9ff; color: #334155; }
+        .article-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .article-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-black text-emerald-600 mb-4">ニュース & ガイド</h1>
+            <p class="text-gray-500 font-bold">Ranking Guesser Partyをより楽しむための情報をお届けします</p>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-16">
+            <!-- 記事1 -->
+            <a href="articles/how-to-enjoy.html" class="article-card bg-white p-8 rounded-3xl shadow-lg block border border-gray-100">
+                <span class="inline-block bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold mb-4">GUIDE</span>
+                <h2 class="text-2xl font-black mb-4 text-gray-800">Ranking Guesser Partyを楽しむための3つのコツ</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    パーティーや飲み会で、初対面の人とも一気に仲良くなれるプレイのコツをまとめました。
+                </p>
+                <span class="text-emerald-500 font-bold text-sm">詳しく読む →</span>
+            </a>
+
+            <!-- 記事2 -->
+            <a href="articles/streamer-guide.html" class="article-card bg-white p-8 rounded-3xl shadow-lg block border border-gray-100">
+                <span class="inline-block bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold mb-4">STREAMER</span>
+                <h2 class="text-2xl font-black mb-4 text-gray-800">配信参加型企画として活用する際のポイント</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    VTuberやストリーマーの方々がリスナーと一緒に盛り上がるための設定や演出について。
+                </p>
+                <span class="text-indigo-500 font-bold text-sm">詳しく読む →</span>
+            </a>
+        </div>
+
+        <section class="bg-emerald-50 p-8 rounded-3xl border border-emerald-100 mb-16">
+            <h3 class="text-xl font-bold mb-4 text-emerald-700">アップデート情報</h3>
+            <ul class="space-y-4">
+                <li class="flex gap-4 items-baseline">
+                    <span class="text-xs font-bold bg-white text-emerald-500 px-2 py-1 rounded border border-emerald-200">2026.04.01</span>
+                    <span class="text-gray-700">お題カテゴリに「サバイバル・もしも」を追加しました。</span>
+                </li>
+                <li class="flex gap-4 items-baseline">
+                    <span class="text-xs font-bold bg-white text-emerald-500 px-2 py-1 rounded border border-emerald-200">2026.03.15</span>
+                    <span class="text-gray-700">スマートフォンでの操作性を大幅に改善しました。</span>
+                </li>
+            </ul>
+        </section>
+
+        <div class="pt-8 border-t border-gray-200 flex justify-between items-center">
+            <a href="index.html" class="text-emerald-600 font-bold hover:underline">
+                ← タイトルへ戻る
+            </a>
+            <p class="text-sm text-gray-400">© 2026 Ranking Guesser Party</p>
+        </div>
+    </div>
+</body>
+</html>
